@@ -17,6 +17,7 @@ from hrgs_scheduler.schedule.node import (
 )
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.evaluator import Evaluator, EvaluationResult
+from hrgs_scheduler.schedule.visualize import render, save_dot, to_dot
 
 __all__ = [
     "GenNode",
@@ -31,4 +32,7 @@ __all__ = [
     "ScheduleDAG",
     "Evaluator",
     "EvaluationResult",
+    "to_dot",
+    "save_dot",
+    "render",
 ]
