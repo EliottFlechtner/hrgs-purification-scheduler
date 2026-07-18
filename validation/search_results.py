@@ -23,6 +23,10 @@ Quick start
     # Use the DP-over-stages search (superset of brute force) instead
     python validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24
 
+    # Save the top-3 schedules as loadable structural artifacts
+    python validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \\
+        --save-top 3 --save-dir outputs/schedules/dp_n4
+
 CLI flags
 ---------
     --algorithm STR     Search algorithm: 'brute_force' (default) or 'dp'
@@ -35,8 +39,13 @@ CLI flags
     --objective STR     Primary objective: 'rate' (default) or 'fidelity'
     --top INT           Print only the top N results (default: all)
     --no-infeasible     Suppress infeasible rows from the printed table
-    --csv PATH          Export results to CSV at this path
-    --json PATH         Export results to JSON at this path
+    --csv PATH          Export results to CSV at this path (summary metrics only)
+    --json PATH         Export results to JSON at this path (summary metrics only)
+    --save-top INT      Save this many top results as full structural artifacts
+                        (loadable ScheduleDAG + NetworkConfig JSON files).
+                        Default: 0 (disabled).
+    --save-dir PATH     Directory for --save-top artifacts
+                        (default: outputs/schedules/)
     --no-heralded       Exclude end-node heralded strategy family (brute_force only)
     --no-optimistic     Exclude end-node optimistic strategy family (brute_force only)
     --no-link           Exclude link-level strategy family (brute_force only)
@@ -63,6 +72,7 @@ from hrgs_scheduler.search import (
     brute_force_search,
     dp_search,
     print_table,
+    save_top,
     to_csv,
     to_json,
 )
@@ -130,6 +140,20 @@ def _build_parser() -> argparse.ArgumentParser:
         "--no-bf-families",
         action="store_true",
         help="Exclude brute force's fixed families from DP results (dp only)",
+    )
+    p.add_argument(
+        "--save-top",
+        type=int,
+        default=0,
+        dest="save_top",
+        help="Save this many top results as full structural artifacts (default: 0)",
+    )
+    p.add_argument(
+        "--save-dir",
+        type=Path,
+        default=Path("outputs/schedules"),
+        dest="save_dir",
+        help="Directory for --save-top artifacts (default: outputs/schedules/)",
     )
     return p
 
@@ -209,6 +233,17 @@ def main() -> None:
     if args.json:
         path = to_json(results, args.json)
         print(f"JSON written → {path}")
+
+    if args.save_top > 0:
+        saved = save_top(
+            results,
+            args.save_dir,
+            network=network,
+            n=args.save_top,
+        )
+        print(f"\n{len(saved)} schedule artifact(s) written → {args.save_dir}")
+        for p in saved:
+            print(f"  {p.name}")
 
 
 if __name__ == "__main__":
