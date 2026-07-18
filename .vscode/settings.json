@@ -1,4 +1,7 @@
 {
+    "python.defaultInterpreterPath": "/usr/local/bin/python3.13",
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.testing.cwd": "${workspaceFolder}",
     "python.testing.pytestArgs": [
         "tests"
     ],
