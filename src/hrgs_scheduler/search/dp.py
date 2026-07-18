@@ -165,6 +165,60 @@ def _prune_pareto(candidates: list[_SpanCandidate]) -> list[_SpanCandidate]:
     ]
 
 
+def _beam_key(
+    c: _SpanCandidate, f_min_hint: float | None
+) -> tuple[int, float, float, int]:
+    """Ranking key used as a *secondary* tiebreak by `_beam_select` (larger
+    is better): prioritises success probability (the main per-resource
+    efficiency signal), then fidelity, then lower cost."""
+    meets_floor = 1 if (f_min_hint is None or c.state.fidelity >= f_min_hint) else 0
+    return (meets_floor, c.success_prob, c.state.fidelity, -c.cost)
+
+
+def _beam_select(
+    candidates: list[_SpanCandidate],
+    beam_width: int,
+    f_min_hint: float | None,
+) -> list[_SpanCandidate]:
+    """Keep only `beam_width` candidates, split across two rankings.
+
+    A single ranking is not safe here: at a single hop, fidelity is
+    always close to 1 regardless of purification, so any fidelity-floor
+    filter is trivially satisfied at that scale — ranking purely by
+    success_prob (i.e. preferring cheap/unpurified candidates) would then
+    discard every purified sub-candidate at low spans, even though
+    composing many such spans (e.g. N=10 hops) is exactly what later
+    drops the *composite* fidelity below the floor, with no purified
+    fallback left in the beam.
+
+    To avoid this, half the beam is reserved for the highest-fidelity
+    candidates (so purification survives pruning and remains available
+    for wide spans that need it) and half for the highest-success_prob
+    candidates (so cheap/efficient candidates survive for spans that
+    already comfortably clear the floor). This is a heuristic, not an
+    exactness guarantee — see module docstring.
+    """
+    if len(candidates) <= beam_width:
+        return candidates
+
+    half = max(1, beam_width // 2)
+    by_fidelity = sorted(
+        candidates, key=lambda c: (c.state.fidelity, -c.cost), reverse=True
+    )
+    by_efficiency = sorted(
+        candidates, key=lambda c: _beam_key(c, f_min_hint), reverse=True
+    )
+
+    kept: dict[NodeId, _SpanCandidate] = {}
+    for c in by_fidelity[:half]:
+        kept[c.node_id] = c
+    for c in by_efficiency:
+        if len(kept) >= beam_width:
+            break
+        kept[c.node_id] = c
+    return list(kept.values())
+
+
 # ---------------------------------------------------------------------------
 # Memoized recursive span-partition search
 # ---------------------------------------------------------------------------
@@ -186,11 +240,15 @@ class _SpanPartitionSearch:
         max_link_copies: int,
         max_enumerated_rounds: int,
         budget_cap: int,
+        max_frontier_size: int | None = None,
+        f_min_hint: float | None = None,
     ) -> None:
         self._network = network
         self._max_link_copies = max_link_copies
         self._max_enumerated_rounds = max_enumerated_rounds
         self._budget_cap = budget_cap
+        self._max_frontier_size = max_frontier_size
+        self._f_min_hint = f_min_hint
         self.nodes: dict[NodeId, ScheduleNode] = {}
         self._counter = count()
         self._memo: dict[tuple[int, int], list[_SpanCandidate]] = {}
@@ -313,6 +371,11 @@ class _SpanPartitionSearch:
                         )
 
         pruned = _prune_pareto(candidates)
+        if (
+            self._max_frontier_size is not None
+            and len(pruned) > self._max_frontier_size
+        ):
+            pruned = _beam_select(pruned, self._max_frontier_size, self._f_min_hint)
         self._memo[key] = pruned
         return pruned
 
