@@ -36,11 +36,12 @@ Optional matplotlib output: set PLOT=True below.
 
 import sys
 import os
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from hrgs_scheduler.models import NetworkConfig
-from hrgs_scheduler.schedule import ScheduleDAG, Evaluator
+from hrgs_scheduler.schedule import Evaluator, ScheduleDAG, render
 
 # ------------------------------------------------------------------
 # Configuration
@@ -51,6 +52,8 @@ N_PUR = 5  # half-RGS copies per side per hop (paper: 5)
 N_POINTS = 20  # number of e_d sample points
 
 e_d_values = [i * 0.01 / (N_POINTS - 1) for i in range(N_POINTS)]
+
+OUTPUT_DIR = Path(__file__).resolve().parents[1] / "outputs" / "reproduction_figures"
 
 # Paper reference values read off Fig. 5 at e_d = 0.000 and e_d = 0.010
 PAPER_REFERENCE = {
@@ -88,6 +91,26 @@ def compute_curves() -> dict[str, list[tuple[float, float]]]:
     return curves
 
 
+def export_dag_artifacts() -> None:
+    """Write PNG exports for the three canonical Fig. 5 DAGs."""
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    cfg = NetworkConfig.integrating_paper_config(e_d=0.01)
+    evaluator = Evaluator(cfg)
+
+    schedules = {
+        "raw": ScheduleDAG.raw_chain(N=N_HOPS),
+        "baseline": ScheduleDAG.baseline_end_node_pumping(N=N_HOPS, n_pur=N_PUR),
+        "flexible": ScheduleDAG.flexible_paper_schedule(N=N_HOPS),
+    }
+
+    for label, dag in schedules.items():
+        result = evaluator.evaluate(dag)
+        try:
+            render(dag, str(OUTPUT_DIR / f"fig5_{label}.png"), result=result)
+        except RuntimeError as exc:
+            print(f"  [warn] skipped fig5_{label}.png export: {exc}")
+
+
 # ------------------------------------------------------------------
 # Output
 # ------------------------------------------------------------------
@@ -109,6 +132,8 @@ def print_table(curves: dict[str, list[tuple[float, float]]]) -> None:
 def main() -> None:
     print(f"Computing Fig. 5 curves (N={N_HOPS}, n_pur={N_PUR})...")
     curves = compute_curves()
+
+    export_dag_artifacts()
 
     print()
     print_table(curves)
@@ -147,6 +172,9 @@ def main() -> None:
             print("\nSaved fig5_fidelity.png")
         except ImportError:
             print("matplotlib not available; set PLOT=True once installed")
+
+    print()
+    print(f"Exported Fig. 5 DAG artifacts to {OUTPUT_DIR}")
 
 
 if __name__ == "__main__":

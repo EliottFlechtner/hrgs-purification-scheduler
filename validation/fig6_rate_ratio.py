@@ -51,11 +51,13 @@ Usage
 
 import sys
 import os
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from hrgs_scheduler.models import NetworkConfig
-from hrgs_scheduler.schedule import ScheduleDAG, Evaluator
+from hrgs_scheduler.schedule import Evaluator, ScheduleDAG, render
+from hrgs_scheduler.timing import TimingParameters, rate_ratio_opt_vs_base
 
 # ------------------------------------------------------------------
 # Configuration
@@ -65,6 +67,8 @@ N_PUR = 5
 N_POINTS = 20
 
 e_d_values = [i * 0.01 / (N_POINTS - 1) for i in range(N_POINTS)]
+
+OUTPUT_DIR = Path(__file__).resolve().parents[1] / "outputs" / "reproduction_figures"
 
 # Paper-reported range [Integrating, Fig. 6, Sec. VI]:
 #   flexible/baseline ratio:      ~45x to ~65x
@@ -102,6 +106,57 @@ def compute_ratios() -> dict[str, list[tuple[float, float]]]:
     return curves
 
 
+def export_dag_artifacts() -> None:
+    """Write PNG exports for the three canonical Fig. 6 DAGs."""
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    cfg = NetworkConfig.integrating_paper_config(e_d=0.01)
+    evaluator = Evaluator(cfg)
+
+    schedules = {
+        "raw": ScheduleDAG.raw_chain(N=N_HOPS),
+        "baseline": ScheduleDAG.baseline_end_node_pumping(N=N_HOPS, n_pur=N_PUR),
+        "flexible": ScheduleDAG.flexible_paper_schedule(N=N_HOPS),
+    }
+
+    for label, dag in schedules.items():
+        result = evaluator.evaluate(dag)
+        try:
+            render(dag, str(OUTPUT_DIR / f"fig6_{label}.png"), result=result)
+        except RuntimeError as exc:
+            print(f"  [warn] skipped fig6_{label}.png export: {exc}")
+
+
+def estimate_tau_emit_for_ratio(target_ratio: float) -> tuple[float, float]:
+    """Coarsely sweep tau_emit to see whether the paper's ratio is reachable.
+
+    Returns the tau_emit value on a log grid that gets closest to the
+    target ratio, together with the resulting ratio under the standalone
+    timing model in hrgs_scheduler.timing.
+    """
+    cfg = NetworkConfig.integrating_paper_config(e_d=0.01)
+    grid = [0.0] + [10.0**exp for exp in (-10, -9, -8, -7, -6, -5, -4, -3)]
+    best_tau_emit = grid[0]
+    best_ratio = -1.0
+    best_distance = float("inf")
+
+    for tau_emit in grid:
+        timing = TimingParameters.default(tau_emit=tau_emit)
+        ratio = rate_ratio_opt_vs_base(
+            cfg,
+            timing,
+            n_pur=N_PUR,
+            p_success_opt=1.0,
+            p_success_base=1.0,
+        )
+        distance = abs(ratio - target_ratio)
+        if distance < best_distance:
+            best_tau_emit = tau_emit
+            best_ratio = ratio
+            best_distance = distance
+
+    return best_tau_emit, best_ratio
+
+
 def print_table(curves: dict[str, list[tuple[float, float]]]) -> None:
     labels = list(curves.keys())
     header = f"{'e_d':>8}" + "".join(f"  {lb:>16}" for lb in labels)
@@ -121,6 +176,8 @@ def main() -> None:
         f"from Evaluator-derived DAG timing..."
     )
     curves = compute_ratios()
+
+    export_dag_artifacts()
 
     print()
     print_table(curves)
@@ -151,6 +208,23 @@ def main() -> None:
         "45-65x requires the authors' specific tau_emit/tau_join/tau_pur_circ "
         "values, which are not stated numerically in the paper text."
     )
+
+    target_midpoint = sum(PAPER_FLEX_OVER_BASE_RANGE) / 2.0
+    tau_emit, approx_ratio = estimate_tau_emit_for_ratio(target_midpoint)
+    print()
+    print("Timing estimate probe:")
+    print(
+        f"  closest coarse-grid tau_emit to the paper's mid-point (~{target_midpoint:.1f}x) "
+        f"is {tau_emit:.1e}, which yields only ~{approx_ratio:.2f}x under the current "
+        "standalone timing model."
+    )
+    print(
+        "  That reinforces the conclusion that the paper's unpublished timing constants "
+        "or cycle-time convention are not recoverable from the public text alone."
+    )
+
+    print()
+    print(f"Exported Fig. 6 DAG artifacts to {OUTPUT_DIR}")
 
 
 if __name__ == "__main__":
