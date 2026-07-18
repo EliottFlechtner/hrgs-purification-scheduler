@@ -518,6 +518,219 @@ class ScheduleDAG:
         return cls(nodes=nodes, root_id=root_id, N=N)
 
     @classmethod
+    def generic_end_node_pumping(
+        cls,
+        N: int,
+        n_pur: int = 5,
+        circuits: Sequence[PurificationCircuit] | None = None,
+        *,
+        heralded: bool = True,
+        gen_time: float = 0.0,
+    ) -> ScheduleDAG:
+        """Build a fully parameterized end-node entanglement-pumping schedule.
+
+        Generalises ``baseline_end_node_pumping`` along two new axes:
+
+        **Circuit sequence** — caller supplies the exact circuit for each
+        pumping round via *circuits* (length ``n_pur - 1``).  If omitted,
+        defaults to the paper's cycling sequence ``[YY, ZX, YY, XZ, …]``,
+        making this a drop-in replacement for the baseline builder.
+
+        **Herald placement** — determined by the *heralded* flag:
+
+        * ``heralded=True`` (default): inserts a round-trip HeraldNode
+          (``propagation_time=2.0``, i.e. 2×L_total/c) after every
+          PurifyNode in the pumping chain — exactly the sequential
+          heralded confirmation modeled by ``baseline_end_node_pumping``
+          [Integrating, §III-B, §VI].
+
+        * ``heralded=False``: chains PurifyNodes directly with no
+          intermediate Heralds — the *optimistic* variant where all
+          classical communication is deferred to the single final
+          one-way Herald shared by all schemes.  In this mode the
+          latency is the same as ``flexible_paper_schedule`` (1×L/c),
+          while the error vector reflects the full pumping sequence.
+
+        The distinction between heralded and optimistic is structural: it
+        is encoded purely by where HeraldNodes sit relative to PurifyNodes
+        in the DAG [Validated Formal Model Def, §3.3].
+
+        Parameters
+        ----------
+        N : int
+            Number of hops.
+        n_pur : int
+            Number of independent raw end-to-end copies to generate.
+        circuits : sequence of PurificationCircuit, optional
+            One circuit per pumping round (length = ``n_pur - 1``).
+            Defaults to the paper's ``[YY, ZX, YY, XZ, …]`` cycle.
+        heralded : bool
+            If True, insert round-trip HeraldNodes between rounds
+            (baseline / heralded-pumping strategy).
+            If False, omit them (optimistic strategy).
+        gen_time : float
+            Simulation timestamp for all Gen nodes.
+
+        Returns
+        -------
+        ScheduleDAG
+        """
+        if n_pur < 1:
+            raise ValueError(f"n_pur must be >= 1, got {n_pur}")
+
+        n_rounds = n_pur - 1
+        _default_cycle = [
+            PurificationCircuit.YY,
+            PurificationCircuit.ZX,
+            PurificationCircuit.YY,
+            PurificationCircuit.XZ,
+        ]
+        if circuits is None:
+            resolved: list[PurificationCircuit] = [
+                _default_cycle[i % len(_default_cycle)] for i in range(n_rounds)
+            ]
+        else:
+            resolved = list(circuits)
+            if len(resolved) != n_rounds:
+                raise ValueError(
+                    f"circuits must have length n_pur - 1 = {n_rounds}, got {len(resolved)}"
+                )
+
+        nodes: dict[NodeId, ScheduleNode] = {}
+        nid = 0
+
+        copy_ids: list[NodeId] = []
+        for _ in range(n_pur):
+            final_id, _, nid = cls._build_raw_segment(nodes, nid, 0, N, gen_time)
+            copy_ids.append(final_id)
+
+        current_id = copy_ids[0]
+        for round_i, sacrificial_id in enumerate(copy_ids[1:]):
+            pur = PurifyNode(
+                node_id=nid,
+                children=(current_id, sacrificial_id),
+                circuit=resolved[round_i],
+                output_stage=Span(0, N),
+            )
+            nid += 1
+            nodes[pur.node_id] = pur
+            if heralded:
+                round_herald = HeraldNode(
+                    node_id=nid, children=(pur.node_id,), propagation_time=2.0
+                )
+                nid += 1
+                nodes[round_herald.node_id] = round_herald
+                current_id = round_herald.node_id
+            else:
+                current_id = pur.node_id
+
+        root_id, _ = cls._wrap_herald_and_correct(nodes, nid, current_id, N)
+        return cls(nodes=nodes, root_id=root_id, N=N)
+
+    @classmethod
+    def link_level_pumped_chain(
+        cls,
+        N: int,
+        n_copies: int = 2,
+        circuits: Sequence[PurificationCircuit] | None = None,
+        gen_time: float = 0.0,
+    ) -> ScheduleDAG:
+        """Build a schedule with link-level purification followed by path stitching.
+
+        For each hop *i*, generates *n_copies* independent single-hop raw
+        edges (each from a separate pair of Gen + AbsaBsm), then pumps them
+        down to one purified link edge at κ = Span(i, i+1) using the
+        supplied circuit sequence.  The resulting N purified link edges are
+        then stitched left-to-right via JoinNodes into a single end-to-end
+        resource, which is wrapped in the standard Herald + PauliCorrect.
+
+        This corresponds to the kind of purification applied to Pair A in
+        ``flexible_paper_schedule``, generalised to arbitrary copy count
+        and circuit choice.  Unlike the end-node strategies, purification
+        here happens *before* stitching — at the smallest possible span
+        (Span(i, i+1)) — which limits decoherence exposure and avoids the
+        round-trip herald cost of heralded end-node pumping.
+
+        With n_copies=1 this degenerates to a plain ``raw_chain``.
+
+        Parameters
+        ----------
+        N : int
+            Number of hops.
+        n_copies : int
+            Number of independent single-hop copies generated per hop.
+            n_copies = 2 with YY gives Pair A from the flexible schedule.
+        circuits : sequence of PurificationCircuit, optional
+            One circuit per pumping round per hop (length = ``n_copies - 1``).
+            Defaults to all-YY (appropriate for the ZI/IZ-biased noise from
+            inner-qubit measurements [Bridging, §VII-D]).
+        gen_time : float
+            Simulation timestamp for all Gen nodes.
+
+        Returns
+        -------
+        ScheduleDAG
+        """
+        if n_copies < 1:
+            raise ValueError(f"n_copies must be >= 1, got {n_copies}")
+
+        n_rounds_per_hop = n_copies - 1
+        if circuits is None:
+            resolved = [PurificationCircuit.YY] * n_rounds_per_hop
+        else:
+            resolved = list(circuits)
+            if len(resolved) != n_rounds_per_hop:
+                raise ValueError(
+                    f"circuits must have length n_copies - 1 = {n_rounds_per_hop},"
+                    f" got {len(resolved)}"
+                )
+
+        if n_copies == 1:
+            return cls.raw_chain(N, gen_time=gen_time)
+
+        nodes: dict[NodeId, ScheduleNode] = {}
+        nid = 0
+
+        hop_purified_ids: list[NodeId] = []
+        for hop_i in range(N):
+            copy_ids: list[NodeId] = []
+            for _ in range(n_copies):
+                edge_id, _, nid = cls._build_raw_segment(nodes, nid, hop_i, 1, gen_time)
+                copy_ids.append(edge_id)
+
+            current_hop_id = copy_ids[0]
+            for round_j in range(n_rounds_per_hop):
+                pur = PurifyNode(
+                    node_id=nid,
+                    children=(current_hop_id, copy_ids[round_j + 1]),
+                    circuit=resolved[round_j],
+                    output_stage=Span(hop_i, hop_i + 1),
+                )
+                nid += 1
+                nodes[pur.node_id] = pur
+                current_hop_id = pur.node_id
+            hop_purified_ids.append(current_hop_id)
+
+        # Stitch purified hop edges left to right
+        current_id = hop_purified_ids[0]
+        current_stage: Stage = Span(0, 1)
+        for hop_i in range(1, N):
+            right_stage = Span(hop_i, hop_i + 1)
+            merged_stage = current_stage.join(right_stage)  # type: ignore[union-attr]
+            jn = JoinNode(
+                node_id=nid,
+                children=(current_id, hop_purified_ids[hop_i]),
+                output_stage=merged_stage,
+            )
+            nid += 1
+            nodes[jn.node_id] = jn
+            current_id = jn.node_id
+            current_stage = merged_stage
+
+        root_id, _ = cls._wrap_herald_and_correct(nodes, nid, current_id, N)
+        return cls(nodes=nodes, root_id=root_id, N=N)
+
+    @classmethod
     def flexible_paper_schedule(cls, N: int = 10, gen_time: float = 0.0) -> ScheduleDAG:
         """Build the "flexible" purification-enhanced schedule from [Integrating, Fig. 4].
 
