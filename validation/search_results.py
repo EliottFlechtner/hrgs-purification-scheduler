@@ -20,8 +20,12 @@ Quick start
     # Show only feasible results, cap at top 20
     python validation/search_results.py --top 20 --no-infeasible
 
+    # Use the DP-over-stages search (superset of brute force) instead
+    python validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24
+
 CLI flags
 ---------
+    --algorithm STR     Search algorithm: 'brute_force' (default) or 'dp'
     --N INT             Number of hops (default: 10, paper config)
     --uniform           Use a uniform network instead of the paper config
     --e_d FLOAT         Depolarizing error per operation (default: 0.005)
@@ -33,10 +37,14 @@ CLI flags
     --no-infeasible     Suppress infeasible rows from the printed table
     --csv PATH          Export results to CSV at this path
     --json PATH         Export results to JSON at this path
-    --no-heralded       Exclude end-node heralded strategy family
-    --no-optimistic     Exclude end-node optimistic strategy family
-    --no-link           Exclude link-level strategy family
-    --max-n-pur INT     Hard cap on purification copy count
+    --no-heralded       Exclude end-node heralded strategy family (brute_force only)
+    --no-optimistic     Exclude end-node optimistic strategy family (brute_force only)
+    --no-link           Exclude link-level strategy family (brute_force only)
+    --max-n-pur INT     Hard cap on purification copy count (brute_force only)
+    --max-link-copies INT       Cap on per-span copy count tried by DP (dp only)
+    --max-enumerated-rounds INT Cap on exhaustive circuit-combo enumeration
+    --no-bf-families    Exclude brute force's fixed families from DP results
+                        (isolates the new span-partition candidates; dp only)
 """
 
 from __future__ import annotations
@@ -51,13 +59,25 @@ sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
 from hrgs_scheduler.cost_functions import ObjectiveConfig
 from hrgs_scheduler.models.network_config import NetworkConfig
-from hrgs_scheduler.search import brute_force_search, print_table, to_csv, to_json
+from hrgs_scheduler.search import (
+    brute_force_search,
+    dp_search,
+    print_table,
+    to_csv,
+    to_json,
+)
 
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="Brute-force schedule search and result export.",
+        description="Schedule search (brute force or DP-over-stages) and result export.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p.add_argument(
+        "--algorithm",
+        choices=["brute_force", "dp"],
+        default="brute_force",
+        help="Search algorithm to run (default: brute_force)",
     )
     p.add_argument("--N", type=int, default=10, help="Number of hops (default: 10)")
     p.add_argument(
@@ -90,7 +110,26 @@ def _build_parser() -> argparse.ArgumentParser:
         type=int,
         default=None,
         dest="max_n_pur",
-        help="Hard cap on purification copy count",
+        help="Hard cap on purification copy count (brute_force only)",
+    )
+    p.add_argument(
+        "--max-link-copies",
+        type=int,
+        default=3,
+        dest="max_link_copies",
+        help="Cap on per-span copy count tried by DP (dp only, default: 3)",
+    )
+    p.add_argument(
+        "--max-enumerated-rounds",
+        type=int,
+        default=3,
+        dest="max_enumerated_rounds",
+        help="Cap on exhaustive circuit-combination enumeration (default: 3)",
+    )
+    p.add_argument(
+        "--no-bf-families",
+        action="store_true",
+        help="Exclude brute force's fixed families from DP results (dp only)",
     )
     return p
 
@@ -136,17 +175,27 @@ def main() -> None:
         f"Network: N={N}, e_d={args.e_d}, total_length={network.total_length():.1f} km"
     )
     print(f"Objective: {args.objective}, f_min={args.f_min}, e_max={args.e_max}")
-    print("Running brute-force search …", flush=True)
+    print(f"Running {args.algorithm} search...", flush=True)
 
-    results = brute_force_search(
-        network,
-        objective,
-        e_max=args.e_max,
-        max_n_pur=args.max_n_pur,
-        include_heralded=not args.no_heralded,
-        include_optimistic=not args.no_optimistic,
-        include_link_level=not args.no_link,
-    )
+    if args.algorithm == "dp":
+        results = dp_search(
+            network,
+            objective,
+            e_max=args.e_max,
+            max_link_copies=args.max_link_copies,
+            max_enumerated_rounds=args.max_enumerated_rounds,
+            include_brute_force_families=not args.no_bf_families,
+        )
+    else:
+        results = brute_force_search(
+            network,
+            objective,
+            e_max=args.e_max,
+            max_n_pur=args.max_n_pur,
+            include_heralded=not args.no_heralded,
+            include_optimistic=not args.no_optimistic,
+            include_link_level=not args.no_link,
+        )
 
     feasible = [r for r in results if r.score > float("-inf")]
     print(f"Done — {len(results)} candidates evaluated, {len(feasible)} feasible.\n")
