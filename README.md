@@ -33,7 +33,8 @@ cost functions) and `docs/WbW Plan.md` for the week-by-week project plan.
 - **Fig. 5 (fidelity vs. `e_d`) reproduction:** near-exact match. At `e_d=0.01`: raw/baseline/flexible = 0.8234/0.9168/0.9295 vs. paper's ~0.823/0.917/0.929.
 - **Fig. 6 (rate ratio) reproduction:** only qualitative/order-of-magnitude match (~8.8x vs. paper's 45-65x for flexible/baseline). The DAG-structural mechanism (single deferred Herald vs. sequential heralded pumping rounds) is correctly modeled and *is* the authoritative source of `rate`/`latency` (not a standalone formula), but the paper doesn't state the numeric `tau_emit`/`tau_join`/`tau_pur_circ` values used for Fig. 6, so exact agreement isn't expected — do not force-fit magic numbers to hit 45-65x.
 - **Canonical timing-table cross-check (§2.6):** `timing.py` implements the three closed-form formulas as an independent check; not yet wired into an automated test asserting agreement with `Evaluator`-derived latencies for the three canonical schedules.
-- **Automated test suite:** none yet — no `test_*.py` files exist. All validation so far is via the two scripts above (manual run) plus ad hoc smoke tests during development. Adding `pytest` regression tests for the model/operations layer and the two validation scripts is outstanding.
+- **Automated test suite:** implemented — `tests/` contains a 130-test `pytest` suite covering the models, operations, schedule layer, cost functions, and regression checks for the two validation scripts. Run it with `python3 -m pytest` (or `/usr/local/bin/python3.13 -m pytest` in this workspace).
+- **Generated artifacts:** validation scripts now export DAG visualizations to `outputs/reproduction_figures/` as PNG files, using the schedule visualization helpers.
 
 ### Running the validation scripts
 
@@ -41,6 +42,8 @@ cost functions) and `docs/WbW Plan.md` for the week-by-week project plan.
 python3 validation/fig5_fidelity_vs_noise.py
 python3 validation/fig6_rate_ratio.py
 ```
+
+The scripts also populate `outputs/reproduction_figures/` with the corresponding DAG PNG exports.
 
 ### Visualizing a schedule
 
