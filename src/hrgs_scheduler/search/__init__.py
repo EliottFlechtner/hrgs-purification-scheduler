@@ -17,8 +17,12 @@ Three tiers, per [Validated Formal Model Def, §7]:
 """
 
 from hrgs_scheduler.search.brute_force import SearchResult, brute_force_search
+from hrgs_scheduler.search.report import print_table, to_csv, to_json
 
 __all__ = [
     "SearchResult",
     "brute_force_search",
+    "print_table",
+    "to_csv",
+    "to_json",
 ]
