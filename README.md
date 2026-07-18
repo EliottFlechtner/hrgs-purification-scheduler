@@ -33,7 +33,7 @@ cost functions) and `docs/WbW Plan.md` for the week-by-week project plan.
 - **Fig. 5 (fidelity vs. `e_d`) reproduction:** near-exact match. At `e_d=0.01`: raw/baseline/flexible = 0.8234/0.9168/0.9295 vs. paper's ~0.823/0.917/0.929.
 - **Fig. 6 (rate ratio) reproduction:** only qualitative/order-of-magnitude match (~8.8x vs. paper's 45-65x for flexible/baseline). The DAG-structural mechanism (single deferred Herald vs. sequential heralded pumping rounds) is correctly modeled and *is* the authoritative source of `rate`/`latency` (not a standalone formula), but the paper doesn't state the numeric `tau_emit`/`tau_join`/`tau_pur_circ` values used for Fig. 6, so exact agreement isn't expected — do not force-fit magic numbers to hit 45-65x.
 - **Canonical timing-table cross-check (§2.6):** `timing.py` implements the three closed-form formulas as an independent check; not yet wired into an automated test asserting agreement with `Evaluator`-derived latencies for the three canonical schedules.
-- **Automated test suite:** implemented — `tests/` contains a 130-test `pytest` suite covering the models, operations, schedule layer, cost functions, and regression checks for the two validation scripts. Run it with `python3 -m pytest` (or `/usr/local/bin/python3.13 -m pytest` in this workspace).
+- **Automated test suite:** implemented — `tests/` contains a 185-test `pytest` suite covering the models, operations, schedule layer, cost functions, outer-loop search (brute force + DP), and regression checks for the two validation scripts. Run it with `python3 -m pytest` (or `/usr/local/bin/python3.13 -m pytest` in this workspace).
 - **Generated artifacts:** validation scripts now export DAG visualizations to `outputs/reproduction_figures/` as PNG files, using the schedule visualization helpers.
 
 ### Running the validation scripts
@@ -62,7 +62,50 @@ render(dag, 'schedule.svg', result=result)  # requires Graphviz \`dot\` on PATH
 "
 ```
 
-**Next (Weeks 2-3):** outer-loop search over `Σ` — brute force on small `N` for
-ground truth, then the DP-over-stages master algorithm, then a heuristic
-fallback (greedy/beam search) for larger `N`.
+## Weeks 2-3: outer loop — **done (brute force + DP)**
+
+Search over the schedule space `Σ` to find the best schedule for a given
+network, objective, and resource budget `e_max`. Two algorithms are
+implemented, both returning the same `SearchResult` type so they can be
+displayed/exported with the same tooling. See
+`docs/Outer Loop Search Design.md` for the full design rationale.
+
+**Files:**
+
+| File | Role |
+|---|---|
+| search/brute_force.py | `brute_force_search()` — exhaustive enumeration of three fixed structural families (raw, end-node pumping heralded/optimistic, uniform link-level pumping). Exact ground truth on small `N`. |
+| search/dp.py | `dp_search()` — memoized recursive search over span-partition structures (Bellman-style optimal-cost-to-go over the span partial order), with variable per-hop copy-count and arbitrary split points. Always a superset of `brute_force_search` on the same inputs. |
+| search/report.py | `print_table`, `to_csv`, `to_json` — display/export utilities for `SearchResult` lists |
+| validation/search_results.py | CLI script: run either search algorithm and print/export the results |
+
+### Running the search CLI
+
+```bash
+# Brute force (default), paper config
+python3 validation/search_results.py
+
+# DP-over-stages, small uniform network
+python3 validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24 --top 10
+
+# Export results
+python3 validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \
+    --csv outputs/search/dp_run.csv --json outputs/search/dp_run.json
+```
+
+Run `python3 validation/search_results.py --help` for the full flag list
+(both algorithms share `--N`, `--uniform`, `--e_d`, `--e_max`, `--f_min`,
+`--objective`, `--top`, `--csv`, `--json`; `--algorithm dp` adds
+`--max-link-copies`, `--max-enumerated-rounds`, `--no-bf-families`).
+
+### Cross-check
+
+`dp_search(...)` always returns a superset of `brute_force_search(...)`
+on identical inputs (by construction — DP merges in the brute-force
+families), which is the "cross-check DP against brute force on small
+cases" validation called for by the WbW plan. This is asserted directly
+in `tests/test_dp.py::TestDpSearch::test_superset_of_brute_force_labels`.
+
+**Next (Weeks 3+):** heuristic search (greedy/beam/simulated annealing)
+for `N`/`e_max` beyond exact DP tractability.
 

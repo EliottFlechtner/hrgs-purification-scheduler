@@ -92,7 +92,7 @@ def print_table(
                 res.label,
                 f"{ev.fidelity:.4f}",
                 r_str,
-                ev.resource_cost,
+                ev.resource_cost,  # type: ignore[format]
                 f"{ev.latency * 1e3:.4f}",
                 f"{ev.success_prob:.4f}",
                 score_str,
