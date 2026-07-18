@@ -97,8 +97,14 @@ class HopConfig:
         """Per-hop inner-qubit error probability p_ZI = p_IZ [Bridging, eq. (10)].
 
         p = 0.5 * [1 − (1 − 2 p^X_in)(1 − 2 p^Z_in)^(m−1)]
+
+        Here ``m`` is the RGS arm count (k_i in [Validated Formal Model Def,
+        §2.1]), NOT the tree-code branching depth. [Bridging, §III.A]
+        defines the RGS as having 2m inner/outer qubits, and eq. (10)'s
+        (m−1) exponent counts the OTHER arms contributing parity, so this
+        must use ``arm_count``, not ``tree_depth`` (branching vector length).
         """
-        m = self.tree_depth
+        m = self.arm_count
         return 0.5 * (
             1.0 - (1.0 - 2.0 * self.p_x_inner) * (1.0 - 2.0 * self.p_z_inner) ** (m - 1)
         )

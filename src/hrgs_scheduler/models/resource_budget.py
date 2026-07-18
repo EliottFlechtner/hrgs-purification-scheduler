@@ -57,7 +57,13 @@ class ResourceBudget:
 
     @property
     def resource_cost(self) -> int:
-        """Minimum number of Gen nodes implied by n_pur alone (2 × n_pur per hop)."""
+        """Copy multiplicity n_pur (not the total Gen-node count).
+
+        NOTE: the actual schedule resource cost C(Σ) used by cost
+        functions is `EvaluationResult.resource_cost` (the Gen-node
+        count of a concrete DAG); this property is an unused/informational
+        shortcut and is not wired into the evaluator.
+        """
         return self.n_pur
 
     # ------------------------------------------------------------------
