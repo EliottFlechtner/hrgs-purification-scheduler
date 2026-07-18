@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "hrgs-scheduler"
+version = "0.1.0"
+description = "Simulator and optimizer for purification scheduling on HRGS-based quantum repeaters"
+requires-python = ">=3.11"
+dependencies = []   # pure-stdlib for the inner loop; numpy/matplotlib added later
+
+[tool.setuptools.packages.find]
+where = ["src"]
