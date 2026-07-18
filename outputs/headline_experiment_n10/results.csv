@@ -1,0 +1,5 @@
+schedule,label,resource_cost,fidelity,success_prob,rate,latency_ms
+"Paper baseline (flexible_paper, Fig. 4)",flexible_paper,100,0.9295137825781352,0.4055923104807098,4055.923104807098,0.1
+Optimizer: best at exact cost=100 (like-for-like),end_optimistic.n5.ZX_ZX_ZX_ZX,100,0.9167933368902863,0.4158139856634852,4158.139856634852,0.1
+Optimizer: best under budget <= 100 (resource-normalized),beam.span.((hop0.n2.YY+(hop1+hop2))+(hop3.n3.ZX_YY+(hop4.n3.ZX_YY+(hop5.n3.ZX_YY+(hop6.n3.ZX_YY+(hop7.n3.ZX_YY+(hop8.n3.ZX_YY+hop9.n3.ZX_YY))))))),50,0.9046928819497215,0.671317509739292,6713.17509739292,0.1
+"Optimizer: global best, unconstrained (e_max=200)",beam.span.((hop0.n2.YY+(hop1+hop2))+(hop3.n3.ZX_YY+(hop4.n3.ZX_YY+(hop5.n3.ZX_YY+(hop6.n3.ZX_YY+(hop7.n3.ZX_YY+(hop8.n3.ZX_YY+hop9.n3.ZX_YY))))))),50,0.9046928819497215,0.671317509739292,6713.17509739292,0.1
