@@ -157,7 +157,11 @@ class SearchTab(ttk.Frame):
         self.network_kind = tk.StringVar(value="paper")
         ttk.Label(net_box, text="Kind").grid(row=0, column=0, sticky="w")
         ttk.Combobox(
-            net_box, textvariable=self.network_kind, values=ctl.NETWORK_KINDS, state="readonly", width=12
+            net_box,
+            textvariable=self.network_kind,
+            values=ctl.NETWORK_KINDS,
+            state="readonly",
+            width=12,
         ).grid(row=0, column=1)
 
         self.n_hops = tk.StringVar(value="10")
@@ -183,7 +187,9 @@ class SearchTab(ttk.Frame):
         )
         for i, (label, var) in enumerate(fields, start=1):
             ttk.Label(net_box, text=label).grid(row=i, column=0, sticky="w")
-            ttk.Entry(net_box, textvariable=var, width=14).grid(row=i, column=1, sticky="ew")
+            ttk.Entry(net_box, textvariable=var, width=14).grid(
+                row=i, column=1, sticky="ew"
+            )
 
         obj_box = ttk.LabelFrame(form, text="Objective")
         obj_box.grid(row=row, column=0, columnspan=2, sticky="ew", pady=6)
@@ -192,15 +198,27 @@ class SearchTab(ttk.Frame):
         self.objective_kind = tk.StringVar(value="rate")
         ttk.Label(obj_box, text="Kind").grid(row=0, column=0, sticky="w")
         ttk.Combobox(
-            obj_box, textvariable=self.objective_kind, values=ctl.OBJECTIVE_KINDS, state="readonly", width=12
+            obj_box,
+            textvariable=self.objective_kind,
+            values=ctl.OBJECTIVE_KINDS,
+            state="readonly",
+            width=12,
         ).grid(row=0, column=1)
 
         self.f_min = tk.StringVar(value="0.9")
         self.r_min = tk.StringVar(value="")
-        ttk.Label(obj_box, text="f_min (rate objective)").grid(row=1, column=0, sticky="w")
-        ttk.Entry(obj_box, textvariable=self.f_min, width=14).grid(row=1, column=1, sticky="ew")
-        ttk.Label(obj_box, text="r_min (fidelity objective)").grid(row=2, column=0, sticky="w")
-        ttk.Entry(obj_box, textvariable=self.r_min, width=14).grid(row=2, column=1, sticky="ew")
+        ttk.Label(obj_box, text="f_min (rate objective)").grid(
+            row=1, column=0, sticky="w"
+        )
+        ttk.Entry(obj_box, textvariable=self.f_min, width=14).grid(
+            row=1, column=1, sticky="ew"
+        )
+        ttk.Label(obj_box, text="r_min (fidelity objective)").grid(
+            row=2, column=0, sticky="w"
+        )
+        ttk.Entry(obj_box, textvariable=self.r_min, width=14).grid(
+            row=2, column=1, sticky="ew"
+        )
 
         algo_box = ttk.LabelFrame(form, text="Algorithm")
         algo_box.grid(row=row, column=0, columnspan=2, sticky="ew", pady=6)
@@ -209,12 +227,18 @@ class SearchTab(ttk.Frame):
         self.algorithm = tk.StringVar(value="dp")
         ttk.Label(algo_box, text="Algorithm").grid(row=0, column=0, sticky="w")
         ttk.Combobox(
-            algo_box, textvariable=self.algorithm, values=ctl.ALGORITHMS, state="readonly", width=12
+            algo_box,
+            textvariable=self.algorithm,
+            values=ctl.ALGORITHMS,
+            state="readonly",
+            width=12,
         ).grid(row=0, column=1)
 
         self.e_max = tk.StringVar(value="40")
         ttk.Label(algo_box, text="e_max (budget)").grid(row=1, column=0, sticky="w")
-        ttk.Entry(algo_box, textvariable=self.e_max, width=14).grid(row=1, column=1, sticky="ew")
+        ttk.Entry(algo_box, textvariable=self.e_max, width=14).grid(
+            row=1, column=1, sticky="ew"
+        )
 
         bf_box = ttk.LabelFrame(form, text="Brute-force options")
         bf_box.grid(row=row, column=0, columnspan=2, sticky="ew", pady=6)
@@ -226,19 +250,27 @@ class SearchTab(ttk.Frame):
         self.include_optimistic = tk.BooleanVar(value=True)
         self.include_link_level = tk.BooleanVar(value=True)
 
-        ttk.Label(bf_box, text="max_n_pur (blank=auto)").grid(row=0, column=0, sticky="w")
-        ttk.Entry(bf_box, textvariable=self.max_n_pur, width=14).grid(row=0, column=1, sticky="ew")
-        ttk.Label(bf_box, text="max_enumerated_rounds").grid(row=1, column=0, sticky="w")
-        ttk.Entry(bf_box, textvariable=self.bf_max_rounds, width=14).grid(row=1, column=1, sticky="ew")
-        ttk.Checkbutton(bf_box, text="include_heralded", variable=self.include_heralded).grid(
-            row=2, column=0, columnspan=2, sticky="w"
+        ttk.Label(bf_box, text="max_n_pur (blank=auto)").grid(
+            row=0, column=0, sticky="w"
         )
-        ttk.Checkbutton(bf_box, text="include_optimistic", variable=self.include_optimistic).grid(
-            row=3, column=0, columnspan=2, sticky="w"
+        ttk.Entry(bf_box, textvariable=self.max_n_pur, width=14).grid(
+            row=0, column=1, sticky="ew"
         )
-        ttk.Checkbutton(bf_box, text="include_link_level", variable=self.include_link_level).grid(
-            row=4, column=0, columnspan=2, sticky="w"
+        ttk.Label(bf_box, text="max_enumerated_rounds").grid(
+            row=1, column=0, sticky="w"
         )
+        ttk.Entry(bf_box, textvariable=self.bf_max_rounds, width=14).grid(
+            row=1, column=1, sticky="ew"
+        )
+        ttk.Checkbutton(
+            bf_box, text="include_heralded", variable=self.include_heralded
+        ).grid(row=2, column=0, columnspan=2, sticky="w")
+        ttk.Checkbutton(
+            bf_box, text="include_optimistic", variable=self.include_optimistic
+        ).grid(row=3, column=0, columnspan=2, sticky="w")
+        ttk.Checkbutton(
+            bf_box, text="include_link_level", variable=self.include_link_level
+        ).grid(row=4, column=0, columnspan=2, sticky="w")
 
         dp_box = ttk.LabelFrame(form, text="DP options")
         dp_box.grid(row=row, column=0, columnspan=2, sticky="ew", pady=6)
@@ -249,11 +281,19 @@ class SearchTab(ttk.Frame):
         self.include_bf_families = tk.BooleanVar(value=True)
 
         ttk.Label(dp_box, text="max_link_copies").grid(row=0, column=0, sticky="w")
-        ttk.Entry(dp_box, textvariable=self.max_link_copies, width=14).grid(row=0, column=1, sticky="ew")
-        ttk.Label(dp_box, text="max_enumerated_rounds").grid(row=1, column=0, sticky="w")
-        ttk.Entry(dp_box, textvariable=self.dp_max_rounds, width=14).grid(row=1, column=1, sticky="ew")
+        ttk.Entry(dp_box, textvariable=self.max_link_copies, width=14).grid(
+            row=0, column=1, sticky="ew"
+        )
+        ttk.Label(dp_box, text="max_enumerated_rounds").grid(
+            row=1, column=0, sticky="w"
+        )
+        ttk.Entry(dp_box, textvariable=self.dp_max_rounds, width=14).grid(
+            row=1, column=1, sticky="ew"
+        )
         ttk.Checkbutton(
-            dp_box, text="include_brute_force_families", variable=self.include_bf_families
+            dp_box,
+            text="include_brute_force_families",
+            variable=self.include_bf_families,
         ).grid(row=2, column=0, columnspan=2, sticky="w")
 
         self.run_button = ttk.Button(form, text="Run Search", command=self._on_run)
@@ -268,24 +308,32 @@ class SearchTab(ttk.Frame):
 
         actions = ttk.Frame(form)
         actions.grid(row=row, column=0, columnspan=2, sticky="ew", pady=6)
-        ttk.Button(actions, text="Visualize selected", command=self._on_visualize).pack(fill="x")
-        ttk.Button(actions, text="Save selected...", command=self._on_save_selected).pack(fill="x", pady=2)
+        ttk.Button(actions, text="Visualize selected", command=self._on_visualize).pack(
+            fill="x"
+        )
+        ttk.Button(
+            actions, text="Save selected...", command=self._on_save_selected
+        ).pack(fill="x", pady=2)
 
         top_n_frame = ttk.Frame(form)
         top_n_frame.grid(row=row + 1, column=0, columnspan=2, sticky="ew")
         self.save_top_n = tk.StringVar(value="3")
         ttk.Label(top_n_frame, text="Save top N:").pack(side="left")
-        ttk.Entry(top_n_frame, textvariable=self.save_top_n, width=5).pack(side="left", padx=4)
-        ttk.Button(top_n_frame, text="Save...", command=self._on_save_top_n).pack(side="left")
+        ttk.Entry(top_n_frame, textvariable=self.save_top_n, width=5).pack(
+            side="left", padx=4
+        )
+        ttk.Button(top_n_frame, text="Save...", command=self._on_save_top_n).pack(
+            side="left"
+        )
 
         export_frame = ttk.Frame(form)
         export_frame.grid(row=row + 2, column=0, columnspan=2, sticky="ew", pady=(4, 0))
-        ttk.Button(export_frame, text="Export CSV...", command=self._on_export_csv).pack(
-            side="left", expand=True, fill="x"
-        )
-        ttk.Button(export_frame, text="Export JSON...", command=self._on_export_json).pack(
-            side="left", expand=True, fill="x", padx=(4, 0)
-        )
+        ttk.Button(
+            export_frame, text="Export CSV...", command=self._on_export_csv
+        ).pack(side="left", expand=True, fill="x")
+        ttk.Button(
+            export_frame, text="Export JSON...", command=self._on_export_json
+        ).pack(side="left", expand=True, fill="x", padx=(4, 0))
 
         form.columnconfigure(1, weight=1)
         for box in (net_box, obj_box, algo_box, bf_box, dp_box):
@@ -312,7 +360,9 @@ class SearchTab(ttk.Frame):
             length=float(self.length.get()),
             gamma=float(self.gamma.get()),
             c=float(self.c_speed.get()),
-            branching=tuple(int(x) for x in self.branching.get().split(",") if x.strip()),
+            branching=tuple(
+                int(x) for x in self.branching.get().split(",") if x.strip()
+            ),
             arm_count=int(self.arm_count.get()),
             p_x_inner=float(self.p_x_inner.get()),
             p_z_inner=float(self.p_z_inner.get()),
@@ -397,7 +447,9 @@ class SearchTab(ttk.Frame):
     def _selected_result(self) -> Any | None:
         sel = self.tree.selection()
         if not sel:
-            messagebox.showinfo("No selection", "Select a row in the results table first.")
+            messagebox.showinfo(
+                "No selection", "Select a row in the results table first."
+            )
             return None
         return self.results[int(sel[0])]
 
@@ -450,7 +502,9 @@ class SearchTab(ttk.Frame):
             messagebox.showinfo("No results", "Run a search first.")
             return
         path = filedialog.asksaveasfilename(
-            title="Export CSV", defaultextension=".csv", initialdir=str(ctl.DEFAULT_EXPORT_DIR)
+            title="Export CSV",
+            defaultextension=".csv",
+            initialdir=str(ctl.DEFAULT_EXPORT_DIR),
         )
         if not path:
             return
@@ -462,7 +516,9 @@ class SearchTab(ttk.Frame):
             messagebox.showinfo("No results", "Run a search first.")
             return
         path = filedialog.asksaveasfilename(
-            title="Export JSON", defaultextension=".json", initialdir=str(ctl.DEFAULT_EXPORT_DIR)
+            title="Export JSON",
+            defaultextension=".json",
+            initialdir=str(ctl.DEFAULT_EXPORT_DIR),
         )
         if not path:
             return
@@ -485,7 +541,9 @@ class LoadTab(ttk.Frame):
 
         top = ttk.Frame(self)
         top.pack(fill="x", padx=8, pady=8)
-        ttk.Button(top, text="Browse artifact...", command=self._on_browse).pack(side="left")
+        ttk.Button(top, text="Browse artifact...", command=self._on_browse).pack(
+            side="left"
+        )
         self.path_label = ttk.Label(top, text="(no file loaded)")
         self.path_label.pack(side="left", padx=8)
 
@@ -496,13 +554,23 @@ class LoadTab(ttk.Frame):
         actions = ttk.Frame(self)
         actions.pack(fill="x", padx=8, pady=4)
         ttk.Button(actions, text="Verify", command=self._on_verify).pack(side="left")
-        ttk.Button(actions, text="Node counts", command=self._on_node_counts).pack(side="left", padx=4)
-        ttk.Button(actions, text="Visualize", command=self._on_visualize).pack(side="left", padx=4)
+        ttk.Button(actions, text="Node counts", command=self._on_node_counts).pack(
+            side="left", padx=4
+        )
+        ttk.Button(actions, text="Visualize", command=self._on_visualize).pack(
+            side="left", padx=4
+        )
         self.annotate_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(actions, text="annotate", variable=self.annotate_var).pack(side="left", padx=4)
-        ttk.Button(actions, text="Export DOT...", command=self._on_export_dot).pack(side="left", padx=4)
+        ttk.Checkbutton(actions, text="annotate", variable=self.annotate_var).pack(
+            side="left", padx=4
+        )
+        ttk.Button(actions, text="Export DOT...", command=self._on_export_dot).pack(
+            side="left", padx=4
+        )
 
-        self.table = ttk.Treeview(self, columns=("field", "value"), show="headings", height=8)
+        self.table = ttk.Treeview(
+            self, columns=("field", "value"), show="headings", height=8
+        )
         self.table.heading("field", text="Field")
         self.table.heading("value", text="Value")
         self.table.pack(fill="both", expand=True, padx=8, pady=(4, 8))
@@ -531,7 +599,9 @@ class LoadTab(ttk.Frame):
         self._current_path = Path(path)
         self.path_label.config(text=str(path))
         ev = result.eval_result
-        score_str = "infeasible" if result.score == float("-inf") else f"{result.score:.6g}"
+        score_str = (
+            "infeasible" if result.score == float("-inf") else f"{result.score:.6g}"
+        )
         summary = (
             f"label       : {result.label}\n"
             f"score       : {score_str}\n"
@@ -547,14 +617,18 @@ class LoadTab(ttk.Frame):
 
     def _require_loaded(self) -> bool:
         if self.loaded_result is None:
-            messagebox.showinfo("No artifact loaded", "Browse for a schedule artifact first.")
+            messagebox.showinfo(
+                "No artifact loaded", "Browse for a schedule artifact first."
+            )
             return False
         return True
 
     def _on_verify(self) -> None:
         if not self._require_loaded():
             return
-        rows = ctl.verify_against_stored(self.loaded_result.dag, self.loaded_network, self.loaded_result)
+        rows = ctl.verify_against_stored(
+            self.loaded_result.dag, self.loaded_network, self.loaded_result
+        )
         self.table.delete(*self.table.get_children())
         self.table.configure(columns=("field", "recomputed", "stored", "ok"))
         for col in ("field", "recomputed", "stored", "ok"):
@@ -563,12 +637,19 @@ class LoadTab(ttk.Frame):
             self.table.insert(
                 "",
                 "end",
-                values=(r.field, f"{r.recomputed:.6g}", f"{r.stored:.6g}", "OK" if r.ok else "MISMATCH"),
+                values=(
+                    r.field,
+                    f"{r.recomputed:.6g}",
+                    f"{r.stored:.6g}",
+                    "OK" if r.ok else "MISMATCH",
+                ),
             )
         if all(r.ok for r in rows):
             messagebox.showinfo("Verify", "All metrics match the stored values.")
         else:
-            messagebox.showwarning("Verify", "Some metrics do NOT match the stored values.")
+            messagebox.showwarning(
+                "Verify", "Some metrics do NOT match the stored values."
+            )
 
     def _on_node_counts(self) -> None:
         if not self._require_loaded():
@@ -604,7 +685,9 @@ class LoadTab(ttk.Frame):
         if not path:
             return
         dot_src = ctl.dag_to_dot(
-            self.loaded_result.dag, network=self.loaded_network, annotate=self.annotate_var.get()
+            self.loaded_result.dag,
+            network=self.loaded_network,
+            annotate=self.annotate_var.get(),
         )
         Path(path).write_text(dot_src, encoding="utf-8")
         messagebox.showinfo("Exported", f"Exported to {path}")
@@ -622,7 +705,9 @@ class FiguresTab(ttk.Frame):
         top.pack(fill="x", padx=8, pady=8)
         ttk.Button(top, text="Refresh", command=self._refresh).pack(side="left")
         ttk.Button(top, text="Preview", command=self._preview).pack(side="left", padx=4)
-        ttk.Button(top, text="Open externally", command=self._open_externally).pack(side="left")
+        ttk.Button(top, text="Open externally", command=self._open_externally).pack(
+            side="left"
+        )
 
         self.listbox = tk.Listbox(self)
         self.listbox.pack(fill="both", expand=True, padx=8, pady=(0, 8))

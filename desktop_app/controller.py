@@ -97,16 +97,26 @@ def build_network(
             gamma=gamma,
             c=c,
         )
-    raise ValueError(f"unknown network kind: {kind!r} (expected one of {NETWORK_KINDS})")
+    raise ValueError(
+        f"unknown network kind: {kind!r} (expected one of {NETWORK_KINDS})"
+    )
 
 
-def build_objective(kind: str, *, f_min: float | None = None, r_min: float | None = None) -> ObjectiveConfig:
+def build_objective(
+    kind: str, *, f_min: float | None = None, r_min: float | None = None
+) -> ObjectiveConfig:
     """Build an :class:`ObjectiveConfig` for the two most common variants."""
     if kind == "rate":
-        return ObjectiveConfig.maximize_rate_with_fidelity_floor(f_min=f_min if f_min is not None else 0.9)
+        return ObjectiveConfig.maximize_rate_with_fidelity_floor(
+            f_min=f_min if f_min is not None else 0.9
+        )
     if kind == "fidelity":
-        return ObjectiveConfig.maximize_fidelity_with_rate_floor(r_min=r_min if r_min is not None else 0.0)
-    raise ValueError(f"unknown objective kind: {kind!r} (expected one of {OBJECTIVE_KINDS})")
+        return ObjectiveConfig.maximize_fidelity_with_rate_floor(
+            r_min=r_min if r_min is not None else 0.0
+        )
+    raise ValueError(
+        f"unknown objective kind: {kind!r} (expected one of {OBJECTIVE_KINDS})"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -140,7 +150,9 @@ def run_search(
             e_max,
             max_link_copies=kwargs.get("max_link_copies", 3),
             max_enumerated_rounds=kwargs.get("max_enumerated_rounds", 3),
-            include_brute_force_families=kwargs.get("include_brute_force_families", True),
+            include_brute_force_families=kwargs.get(
+                "include_brute_force_families", True
+            ),
         )
     raise ValueError(f"unknown algorithm: {algorithm!r} (expected one of {ALGORITHMS})")
 
@@ -150,7 +162,9 @@ def run_search(
 # ---------------------------------------------------------------------------
 
 
-def save_selected(result: SearchResult, path: str | Path, *, network: NetworkConfig) -> Path:
+def save_selected(
+    result: SearchResult, path: str | Path, *, network: NetworkConfig
+) -> Path:
     return save_result(result, path, network=network)
 
 
@@ -162,14 +176,26 @@ def save_top_n(
     n: int,
     include_infeasible: bool = False,
 ) -> list[Path]:
-    return save_top(results, directory, network=network, n=n, include_infeasible=include_infeasible)
+    return save_top(
+        results, directory, network=network, n=n, include_infeasible=include_infeasible
+    )
 
 
-def export_csv(results: Sequence[SearchResult], path: str | Path, *, include_infeasible: bool = True) -> Path:
+def export_csv(
+    results: Sequence[SearchResult],
+    path: str | Path,
+    *,
+    include_infeasible: bool = True,
+) -> Path:
     return to_csv(results, path, include_infeasible=include_infeasible)
 
 
-def export_json(results: Sequence[SearchResult], path: str | Path, *, include_infeasible: bool = True) -> Path:
+def export_json(
+    results: Sequence[SearchResult],
+    path: str | Path,
+    *,
+    include_infeasible: bool = True,
+) -> Path:
     return to_json(results, path, include_infeasible=include_infeasible)
 
 
@@ -193,13 +219,19 @@ class VerifyRow:
 _VERIFY_TOL = 1e-9
 
 
-def verify_against_stored(dag: ScheduleDAG, network: NetworkConfig, result: SearchResult) -> list[VerifyRow]:
+def verify_against_stored(
+    dag: ScheduleDAG, network: NetworkConfig, result: SearchResult
+) -> list[VerifyRow]:
     """Re-evaluate *dag* and compare against the (loaded) *result*'s stored metrics."""
     recomputed = Evaluator(network).evaluate(dag)
     pairs = (
         ("fidelity", recomputed.fidelity, result.eval_result.fidelity),
         ("rate", recomputed.rate, result.eval_result.rate),
-        ("resource_cost", float(recomputed.resource_cost), float(result.eval_result.resource_cost)),
+        (
+            "resource_cost",
+            float(recomputed.resource_cost),
+            float(result.eval_result.resource_cost),
+        ),
         ("latency_s", recomputed.latency, result.eval_result.latency),
         ("success_prob", recomputed.success_prob, result.eval_result.success_prob),
     )
@@ -241,15 +273,21 @@ def render_dag(
     re-evaluated and per-node fidelity/time annotations are included.
     Raises ``RuntimeError`` if the Graphviz ``dot`` executable is missing.
     """
-    result = Evaluator(network).evaluate(dag) if (annotate and network is not None) else None
+    result = (
+        Evaluator(network).evaluate(dag) if (annotate and network is not None) else None
+    )
     out_path = Path(out_path)
     _render_dag(dag, str(out_path), result=result)
     return out_path
 
 
-def dag_to_dot(dag: ScheduleDAG, *, network: NetworkConfig | None = None, annotate: bool = False) -> str:
+def dag_to_dot(
+    dag: ScheduleDAG, *, network: NetworkConfig | None = None, annotate: bool = False
+) -> str:
     """Return the Graphviz DOT source for *dag* (no external ``dot`` binary required)."""
-    result = Evaluator(network).evaluate(dag) if (annotate and network is not None) else None
+    result = (
+        Evaluator(network).evaluate(dag) if (annotate and network is not None) else None
+    )
     return _to_dot(dag, result=result)
 
 
@@ -299,4 +337,6 @@ def open_externally(path: str | Path) -> None:
 
         os.startfile(path)  # type: ignore[attr-defined]
     else:
-        raise RuntimeError(f"Don't know how to open files externally on {sys.platform!r}")
+        raise RuntimeError(
+            f"Don't know how to open files externally on {sys.platform!r}"
+        )
