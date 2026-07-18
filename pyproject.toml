@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "hrgs-scheduler"
@@ -9,5 +9,11 @@ description = "Simulator and optimizer for purification scheduling on HRGS-based
 requires-python = ">=3.11"
 dependencies = []   # pure-stdlib for the inner loop; numpy/matplotlib added later
 
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
