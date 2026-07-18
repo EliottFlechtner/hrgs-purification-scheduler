@@ -21,7 +21,14 @@ Three tiers, per [Validated Formal Model Def, §7]:
 
 from hrgs_scheduler.search.brute_force import SearchResult, brute_force_search
 from hrgs_scheduler.search.dp import dp_search
-from hrgs_scheduler.search.report import print_table, to_csv, to_json
+from hrgs_scheduler.search.report import (
+    load_result,
+    print_table,
+    save_result,
+    save_top,
+    to_csv,
+    to_json,
+)
 
 __all__ = [
     "SearchResult",
@@ -30,4 +37,7 @@ __all__ = [
     "print_table",
     "to_csv",
     "to_json",
+    "save_result",
+    "load_result",
+    "save_top",
 ]
