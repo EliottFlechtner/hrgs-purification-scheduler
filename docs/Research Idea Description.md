@@ -1,0 +1,19 @@
+## Decided Idea: Characterizing and Optimizing Purification Scheduling Strategies for HRGS-based Repeaters
+
+**Motivation / framing to open with:**
+
+[[Bencha2026Bridging|Bridging paper]] establishes the HRGS building block and shows how Z side-effects propagate cleanly to end nodes with constant 2-bit/ABSA/trial overhead. [[Bencha2025Integrating|Integrating paper]] then shows this building block is _compatible_ with arbitrary purification scheduling — purification circuits (YY, ZX, XZ) can be inserted at the RGSS level (on anchor qubits before joining half-RGSs), at intermediate link levels, or at end nodes, combined with optimistic (blind) purification to avoid double heralding round-trips. Their numerical results use one fixed, hand-chosen schedule (YY→ZX→YY→XZ...) and explicitly state this was done "without schedule optimization — further improvements expected." That's the gap I want to occupy.
+
+**The problem, stated precisely:**
+
+Given a fixed physical setup — number of hops $N$, half-RGS branching parameters, per-photon/per-gate error rates, a resource budget (number of half-RGSs generated per trial, $n_{\text{pur}}$), and a latency constraint — find the purification schedule (which circuit, at which stage: RGSS/link/end-node, in what order, how many rounds) that optimizes a target metric (fidelity, or rate, or a fidelity-rate-latency tradeoff).
+
+This is a genuine combinatorial scheduling/search problem layered on top of physics that's already fully specified in the two prior papers, which is why it's tractable in 2 months: I don't need to derive new error models, I need to _search the space_ the [[Bencha2025Integrating|Integrating paper]] opened up but didn't explore.
+
+**Concrete decomposition (want feedback on):**
+
+1. **Formalize the strategy space.** A schedule is a sequence of decisions: at each stage (generation/RGSS, per-hop link, end-node), choose a circuit (YY, ZX, XZ, or "skip"), which pairs/copies to consume, and whether to wait for heralding or go optimistic. I'd define this as a small DSL or just an enumerable tree so it's programmatically searchable.
+2. **Define "good."** Not just final fidelity — the real tradeoffs are fidelity vs. consumption rate (each purification round consumes copies) vs. latency (optimistic vs. heralded) vs. qubit/emitter resource count. I want to propose 2–3 candidate objective functions (e.g., fidelity subject to a rate floor; or rate subject to a fidelity floor of 0.9 as in their numerics) so the comparison to their baseline schedule is apples-to-apples.
+3. **Build the simulator.** Reuse directly: the BSM$(e_1,e_2)$ composition rule for outer-qubit errors, the biased inner-qubit ZI/IZ error accumulation formula, and the $P_{YY}, P_{ZX}$ circuit success/output formulas already derived in both papers. This is largely assembling existing closed-form expressions into a program rather than deriving new physics.
+4. **Search.** Start small — brute force over short schedules (e.g., ≤5 purification rounds, few hops) to get exact optimal schedules and see if they match or beat the paper's hand-picked YY-first heuristic. Then scale up with a greedy or heuristic search (since full enumeration blows up with hop count and $n_{\text{pur}}$) and see if the qualitative structure (e.g., "always start with YY because of the ZI/IZ bias") still holds or breaks down in some regime.
+5. **Characterize regimes.** The payoff result: show _when_ the naive YY-first fixed schedule is near-optimal (probably: uniform noise, symmetric hops) versus when a smarter schedule wins (probably: asymmetric loss/noise across hops, or tight latency budgets where optimistic purification's single round-trip matters more).
