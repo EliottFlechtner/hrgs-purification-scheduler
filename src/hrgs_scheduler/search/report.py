@@ -16,9 +16,14 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from pathlib import Path
 from typing import IO, Sequence
 
+from hrgs_scheduler.models.network_config import NetworkConfig
+from hrgs_scheduler.schedule.evaluator import EvaluationResult
+from hrgs_scheduler.schedule.serde import load_schedule as _load_schedule
+from hrgs_scheduler.schedule.serde import save_schedule as _save_schedule
 from hrgs_scheduler.search.brute_force import SearchResult
 
 # ---------------------------------------------------------------------------
@@ -228,3 +233,160 @@ def to_json(
         json.dump(records, f, indent=2)
 
     return out
+
+
+# ---------------------------------------------------------------------------
+# Schedule artifact: structural save / load
+# ---------------------------------------------------------------------------
+
+_LABEL_UNSAFE = re.compile(r"[^\w\-]")
+
+
+def _safe_filename(label: str, rank: int, ext: str = ".json") -> str:
+    """Convert a (potentially long, symbol-heavy) label to a safe filename."""
+    safe = _LABEL_UNSAFE.sub("_", label)[:80].rstrip("_")
+    return f"rank_{rank:03d}_{safe}{ext}"
+
+
+def save_result(
+    result: SearchResult,
+    path: str | Path,
+    *,
+    network: NetworkConfig,
+) -> Path:
+    """Save a complete *SearchResult* to a self-contained JSON artifact.
+
+    The file stores the full DAG (node-level structure), the network
+    config, and all scalar evaluation metrics.  It can be loaded back
+    with :func:`load_result` without re-running the search.
+
+    Per-node ``State`` caches (``eval_result.node_states``) are NOT
+    persisted — they are large and fully recomputable::
+
+        dag, network, _ = load_schedule(path)
+        full_eval = Evaluator(network).evaluate(dag)
+
+    Parameters
+    ----------
+    result : SearchResult
+        The candidate to save.
+    path : str or Path
+        Destination file path.  Parent directories are created if needed.
+    network : NetworkConfig
+        The network the search was run against.
+
+    Returns
+    -------
+    Path
+        Absolute path of the written file.
+    """
+    ev = result.eval_result
+    score = result.score
+    return _save_schedule(
+        result.dag,
+        path,
+        network=network,
+        label=result.label,
+        score=score if score != float("-inf") else None,
+        fidelity=ev.fidelity,
+        rate=ev.rate,
+        resource_cost=ev.resource_cost,
+        latency_s=ev.latency,
+        success_prob=ev.success_prob,
+    )
+
+
+def load_result(
+    path: str | Path,
+) -> tuple[SearchResult, NetworkConfig]:
+    """Load a :class:`SearchResult` artifact saved by :func:`save_result`.
+
+    The returned ``SearchResult.eval_result.node_states`` is an empty dict
+    (not stored).  To get the full per-node state cache, re-evaluate::
+
+        result, network = load_result(path)
+        full_eval = Evaluator(network).evaluate(result.dag)
+
+    Parameters
+    ----------
+    path : str or Path
+        Path of a file previously written by :func:`save_result`.
+
+    Returns
+    -------
+    result : SearchResult
+    network : NetworkConfig
+
+    Raises
+    ------
+    ValueError
+        If the file format is unrecognised or from an incompatible version.
+    """
+    dag, network, meta = _load_schedule(path)
+    ev_raw = meta.get("eval") or {}
+    eval_result = EvaluationResult(
+        fidelity=float(ev_raw.get("fidelity") or 0.0),
+        rate=float(ev_raw.get("rate") or 0.0),
+        resource_cost=int(ev_raw.get("resource_cost") or 0),
+        latency=float(ev_raw.get("latency_s") or 0.0),
+        success_prob=float(ev_raw.get("success_prob") or 0.0),
+        node_states={},
+    )
+    raw_score = meta.get("score")
+    score = float("-inf") if raw_score is None else float(raw_score)
+    return (
+        SearchResult(
+            label=meta.get("label", ""),
+            dag=dag,
+            eval_result=eval_result,
+            score=score,
+        ),
+        network,
+    )
+
+
+def save_top(
+    results: Sequence[SearchResult],
+    directory: str | Path,
+    *,
+    network: NetworkConfig,
+    n: int = 1,
+    include_infeasible: bool = False,
+) -> list[Path]:
+    """Save the top-*n* results as individual schedule artifacts.
+
+    Files are named ``rank_001_<sanitized_label>.json`` etc.  Each file
+    can be loaded independently with :func:`load_result`.
+
+    Parameters
+    ----------
+    results : sequence of SearchResult
+        Ordered list as returned by a search function (best-first).
+    directory : str or Path
+        Output directory.  Created if it does not exist.
+    network : NetworkConfig
+        The network the search was run against.
+    n : int
+        Number of top results to save (default 1).
+    include_infeasible : bool
+        When False (default), infeasible results (score = -∞) are skipped.
+
+    Returns
+    -------
+    list[Path]
+        Absolute paths of the written files, in rank order.
+    """
+    rows = list(results)
+    if not include_infeasible:
+        rows = [r for r in rows if r.score > float("-inf")]
+    rows = rows[:n]
+
+    out_dir = Path(directory).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    paths: list[Path] = []
+    for rank, res in enumerate(rows, 1):
+        fname = _safe_filename(res.label, rank)
+        p = save_result(res, out_dir / fname, network=network)
+        paths.append(p)
+    return paths
