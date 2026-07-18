@@ -16,8 +16,8 @@ Success probabilities:
 
 Post-purification error vectors (conditional on success):
 
-    Pur_ZX = (1/P_ZX)  [w₁w₂+z₁z₂,  z₁w₂+w₁z₂,  x₁y₂+y₁x₂,  x₁x₂+y₁y₂]
-    Pur_XZ = (1/P_XZ)  [w₁w₂+x₁x₂,  z₁z₂+y₁y₂,  z₁y₂+y₁z₂,  x₁w₂+w₁x₂]
+    Pur_ZX = (1/P_ZX)  [w₁w₂+x₁x₂,  z₁z₂+y₁y₂,  z₁y₂+y₁z₂,  x₁w₂+w₁x₂]
+    Pur_XZ = (1/P_XZ)  [w₁w₂+z₁z₂,  z₁w₂+w₁z₂,  x₁y₂+y₁x₂,  x₁x₂+y₁y₂]
     Pur_YY = (1/P_YY)  [w₁w₂+y₁y₂,  x₁z₂+z₁x₂,  y₁w₂+w₁y₂,  x₁x₂+z₁z₂]
 
 Physical meaning of each circuit [Integrating, §V-B]
@@ -99,20 +99,20 @@ def _success_prob_yy(e1: ErrorVector, e2: ErrorVector) -> float:
 def _output_vector_zx(e1: ErrorVector, e2: ErrorVector, p: float) -> ErrorVector:
     """Pur_ZX output vector, normalised by 1/P_ZX."""
     return ErrorVector(
-        w=(e1.w * e2.w + e1.z * e2.z) / p,
-        x=(e1.z * e2.w + e1.w * e2.z) / p,
-        y=(e1.x * e2.y + e1.y * e2.x) / p,
-        z=(e1.x * e2.x + e1.y * e2.y) / p,
+        w=(e1.w * e2.w + e1.x * e2.x) / p,
+        x=(e1.z * e2.z + e1.y * e2.y) / p,
+        y=(e1.z * e2.y + e1.y * e2.z) / p,
+        z=(e1.x * e2.w + e1.w * e2.x) / p,
     )
 
 
 def _output_vector_xz(e1: ErrorVector, e2: ErrorVector, p: float) -> ErrorVector:
     """Pur_XZ output vector, normalised by 1/P_XZ."""
     return ErrorVector(
-        w=(e1.w * e2.w + e1.x * e2.x) / p,
-        x=(e1.z * e2.z + e1.y * e2.y) / p,
-        y=(e1.z * e2.y + e1.y * e2.z) / p,
-        z=(e1.x * e2.w + e1.w * e2.x) / p,
+        w=(e1.w * e2.w + e1.z * e2.z) / p,
+        x=(e1.z * e2.w + e1.w * e2.z) / p,
+        y=(e1.x * e2.y + e1.y * e2.x) / p,
+        z=(e1.x * e2.x + e1.y * e2.y) / p,
     )
 
 
