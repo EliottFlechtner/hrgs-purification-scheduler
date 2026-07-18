@@ -15,12 +15,16 @@ Three tiers, per [Validated Formal Model Def, §7]:
      brute_force_search on the same inputs; see search/dp.py for the
      full design rationale and documented scope limits.
 
-  3. Heuristic search (planned) — greedy / beam / simulated annealing once
-     N, B exceed exact DP tractability.
+  3. ``heuristic`` (``beam_search``) — same span-partition recursion as
+     tier 2, but each span's frontier is capped at a fixed beam width
+     instead of kept in full, trading Pareto-exactness for tractability
+     at N/e_max beyond exact DP's reach (e.g. the paper's N=10 config).
+     See search/heuristic.py.
 """
 
 from hrgs_scheduler.search.brute_force import SearchResult, brute_force_search
 from hrgs_scheduler.search.dp import dp_search
+from hrgs_scheduler.search.heuristic import beam_search
 from hrgs_scheduler.search.report import (
     load_result,
     print_table,
@@ -34,6 +38,7 @@ __all__ = [
     "SearchResult",
     "brute_force_search",
     "dp_search",
+    "beam_search",
     "print_table",
     "to_csv",
     "to_json",

@@ -69,6 +69,7 @@ sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 from hrgs_scheduler.cost_functions import ObjectiveConfig
 from hrgs_scheduler.models.network_config import NetworkConfig
 from hrgs_scheduler.search import (
+    beam_search,
     brute_force_search,
     dp_search,
     print_table,
@@ -85,9 +86,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "--algorithm",
-        choices=["brute_force", "dp"],
+        choices=["brute_force", "dp", "beam"],
         default="brute_force",
-        help="Search algorithm to run (default: brute_force)",
+        help="Search algorithm to run (default: brute_force). Use 'beam' for "
+        "N/e_max beyond exact DP tractability (e.g. the paper's N=10 config).",
     )
     p.add_argument("--N", type=int, default=10, help="Number of hops (default: 10)")
     p.add_argument(
@@ -139,7 +141,15 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--no-bf-families",
         action="store_true",
-        help="Exclude brute force's fixed families from DP results (dp only)",
+        help="Exclude brute force's fixed families from results (dp/beam only)",
+    )
+    p.add_argument(
+        "--beam-width",
+        type=int,
+        default=25,
+        dest="beam_width",
+        help="Max candidates kept per span (beam only, default: 25). Larger "
+        "approaches exact-DP quality at higher runtime cost.",
     )
     p.add_argument(
         "--save-top",
@@ -206,6 +216,16 @@ def main() -> None:
             network,
             objective,
             e_max=args.e_max,
+            max_link_copies=args.max_link_copies,
+            max_enumerated_rounds=args.max_enumerated_rounds,
+            include_brute_force_families=not args.no_bf_families,
+        )
+    elif args.algorithm == "beam":
+        results = beam_search(
+            network,
+            objective,
+            e_max=args.e_max,
+            beam_width=args.beam_width,
             max_link_copies=args.max_link_copies,
             max_enumerated_rounds=args.max_enumerated_rounds,
             include_brute_force_families=not args.no_bf_families,
