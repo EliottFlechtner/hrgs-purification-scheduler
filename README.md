@@ -21,11 +21,13 @@ cost functions) and `docs/WbW Plan.md` for the week-by-week project plan.
 | schedule/node.py | All 7 frozen DAG node types |
 | schedule/dag.py | `ScheduleDAG` — topo sort, stage-consistency validation (§4.1), `raw_chain`, `baseline_end_node_pumping`, `flexible_paper_schedule`, `single_hop_yy_purified` builders |
 | schedule/evaluator.py | `Evaluator.evaluate()` — O(\|T\|) bottom-up pass → `EvaluationResult(F,R,C,L)` |
+| schedule/serde.py | Stable JSON de/serializer for `ScheduleDAG` + `NetworkConfig` artifacts (`save_schedule`, `load_schedule`) |
 | schedule/visualize.py | `to_dot`/`save_dot`/`render` — Graphviz export of a `ScheduleDAG`, color/shape-coded by node type, optionally annotated with an `EvaluationResult` |
 | cost_functions.py | `ObjectiveConfig`, `compare_schedules`, all §6.3 objective variants |
 | timing.py | Closed-form canonical timing formulas (§2.6 table) — independent cross-check; `Evaluator.rate`/`.latency` (derived from actual DAG Herald/Purify structure) is the authoritative source |
 | validation/fig5_fidelity_vs_noise.py | Reproduces [Integrating, Fig. 5]: fidelity vs. `e_d` for raw/baseline/flexible schedules |
 | validation/fig6_rate_ratio.py | Reproduces [Integrating, Fig. 6]: rate ratios, derived from `Evaluator.evaluate(dag).rate` |
+| validation/load_schedule.py | CLI to load saved schedule artifacts, verify metrics, print node counts, and export DOT/rendered images |
 
 ### Validation status against `docs/WbW Plan.md`'s Weeks 1-2 acceptance criteria
 
@@ -33,7 +35,7 @@ cost functions) and `docs/WbW Plan.md` for the week-by-week project plan.
 - **Fig. 5 (fidelity vs. `e_d`) reproduction:** near-exact match. At `e_d=0.01`: raw/baseline/flexible = 0.8234/0.9168/0.9295 vs. paper's ~0.823/0.917/0.929.
 - **Fig. 6 (rate ratio) reproduction:** only qualitative/order-of-magnitude match (~8.8x vs. paper's 45-65x for flexible/baseline). The DAG-structural mechanism (single deferred Herald vs. sequential heralded pumping rounds) is correctly modeled and *is* the authoritative source of `rate`/`latency` (not a standalone formula), but the paper doesn't state the numeric `tau_emit`/`tau_join`/`tau_pur_circ` values used for Fig. 6, so exact agreement isn't expected — do not force-fit magic numbers to hit 45-65x.
 - **Canonical timing-table cross-check (§2.6):** `timing.py` implements the three closed-form formulas as an independent check; not yet wired into an automated test asserting agreement with `Evaluator`-derived latencies for the three canonical schedules.
-- **Automated test suite:** implemented — `tests/` contains a 185-test `pytest` suite covering the models, operations, schedule layer, cost functions, outer-loop search (brute force + DP), and regression checks for the two validation scripts. Run it with `python3 -m pytest` (or `/usr/local/bin/python3.13 -m pytest` in this workspace).
+- **Automated test suite:** implemented — `tests/` contains a 227-test `pytest` suite covering the models, operations, schedule layer, cost functions, outer-loop search (brute force + DP), serialization round-trips, and regression checks for the validation scripts. Run it with `python3 -m pytest` (or `/usr/local/bin/python3.13 -m pytest` in this workspace).
 - **Generated artifacts:** validation scripts now export DAG visualizations to `outputs/reproduction_figures/` as PNG files, using the schedule visualization helpers.
 
 ### Running the validation scripts
@@ -76,8 +78,9 @@ displayed/exported with the same tooling. See
 |---|---|
 | search/brute_force.py | `brute_force_search()` — exhaustive enumeration of three fixed structural families (raw, end-node pumping heralded/optimistic, uniform link-level pumping). Exact ground truth on small `N`. |
 | search/dp.py | `dp_search()` — memoized recursive search over span-partition structures (Bellman-style optimal-cost-to-go over the span partial order), with variable per-hop copy-count and arbitrary split points. Always a superset of `brute_force_search` on the same inputs. |
-| search/report.py | `print_table`, `to_csv`, `to_json` — display/export utilities for `SearchResult` lists |
+| search/report.py | `print_table`, `to_csv`, `to_json`, `save_result`, `load_result`, `save_top` — display/export utilities plus structural save/load helpers for `SearchResult` artifacts |
 | validation/search_results.py | CLI script: run either search algorithm and print/export the results |
+| validation/load_schedule.py | CLI script: load a saved schedule artifact, verify it, and visualize/export it |
 
 ### Running the search CLI
 
@@ -91,12 +94,59 @@ python3 validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24 -
 # Export results
 python3 validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \
     --csv outputs/search/dp_run.csv --json outputs/search/dp_run.json
+
+# Save the top 3 schedules as full, loadable artifacts
+python3 validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \
+    --save-top 3 --save-dir outputs/schedules/dp_n4
 ```
 
 Run `python3 validation/search_results.py --help` for the full flag list
 (both algorithms share `--N`, `--uniform`, `--e_d`, `--e_max`, `--f_min`,
 `--objective`, `--top`, `--csv`, `--json`; `--algorithm dp` adds
 `--max-link-copies`, `--max-enumerated-rounds`, `--no-bf-families`).
+
+### Persisting, reloading, and visualizing found schedules
+
+`--csv` / `--json` exports are summary tables only (rank/label/metrics).
+To keep a schedule as a reusable object, save structural artifacts with
+`--save-top` (or programmatically via `search.save_result`).
+
+```bash
+# 1) Save top-k structural artifacts from a search run
+python3 validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \
+    --save-top 5 --save-dir outputs/schedules/dp_n4
+
+# 2) Inspect one saved artifact (summary)
+python3 validation/load_schedule.py \
+    outputs/schedules/dp_n4/rank_001_*.json
+
+# 3) Re-evaluate and verify stored metrics vs fresh evaluator output
+python3 validation/load_schedule.py \
+    outputs/schedules/dp_n4/rank_001_*.json --verify --print-nodes
+
+# 4) Export DOT and render SVG/PNG from the loaded schedule
+python3 validation/load_schedule.py \
+    outputs/schedules/dp_n4/rank_001_*.json \
+    --dot outputs/schedules/dp_n4/rank_001.dot
+
+python3 validation/load_schedule.py \
+    outputs/schedules/dp_n4/rank_001_*.json \
+    --render outputs/schedules/dp_n4/rank_001.svg --annotate
+```
+
+Programmatic API for the same workflow:
+
+```python
+from hrgs_scheduler.search import dp_search, save_result, load_result
+from hrgs_scheduler.schedule import load_schedule, save_schedule
+
+# save one result
+result = dp_search(network, objective, e_max=24)[0]
+save_result(result, "outputs/schedules/best.json", network=network)
+
+# load it later
+loaded_result, loaded_network = load_result("outputs/schedules/best.json")
+```
 
 ### Cross-check
 
