@@ -101,13 +101,26 @@ def run_one_point(e_d: float) -> list[Row]:
         if r.eval_result.resource_cost == paper.eval_result.resource_cost
     )
     budget = results[0]
+    # [Roadmap_Derisk_and_Reframe.md §4] uniform link-level family, best
+    # candidate within budget (results is sorted best-first already).
+    link_best = next(
+        (
+            r
+            for r in results
+            if r.label.startswith("link.") and r.eval_result.resource_cost <= E_MAX
+        ),
+        None,
+    )
 
     rows = []
-    for variant, r in (
+    variants: list[tuple[str, object]] = [
         ("paper_baseline", paper),
         ("optimizer_matched_cost", matched),
         ("optimizer_budget_relaxed", budget),
-    ):
+    ]
+    if link_best is not None:
+        variants.append(("link_level_baseline", link_best))
+    for variant, r in variants:
         rows.append(
             Row(
                 e_d=e_d,
@@ -170,6 +183,10 @@ def write_improvement_csv(rows: list[Row], path: Path) -> None:
                 "budget_relaxed_rate_improvement_pct",
                 "budget_relaxed_cost_ratio",
                 "budget_relaxed_fidelity_delta",
+                "link_level_cost",
+                "link_level_fidelity",
+                "link_level_rate",
+                "budget_relaxed_vs_link_level_rate_improvement_pct",
             ]
         )
         for e_d in E_D_VALUES:
@@ -177,6 +194,7 @@ def write_improvement_csv(rows: list[Row], path: Path) -> None:
             paper = variants["paper_baseline"]
             matched = variants["optimizer_matched_cost"]
             budget = variants["optimizer_budget_relaxed"]
+            link = variants.get("link_level_baseline")
             writer.writerow(
                 [
                     e_d,
@@ -185,6 +203,14 @@ def write_improvement_csv(rows: list[Row], path: Path) -> None:
                     (budget.rate / paper.rate - 1.0) * 100.0,
                     budget.resource_cost / paper.resource_cost,
                     budget.fidelity - paper.fidelity,
+                    link.resource_cost if link else "",
+                    link.fidelity if link else "",
+                    link.rate if link else "",
+                    (
+                        (budget.rate / link.rate - 1.0) * 100.0
+                        if link and link.rate
+                        else ""
+                    ),
                 ]
             )
 
@@ -314,6 +340,65 @@ def write_readme(rows: list[Row], elapsed_s: float) -> None:
         f" e_d={lo:.3f}, {pct(budget_hi, paper_hi):+.1f}% at e_d={hi:.3f}"
         f" (spending {budget_lo.resource_cost}/{paper_lo.resource_cost} and"
         f" {budget_hi.resource_cost}/{paper_hi.resource_cost} of the paper's cost, respectively).",
+        "",
+        "## Link-level baseline comparison [Roadmap_Derisk_and_Reframe.md §4]",
+        "",
+        "The uniform link-level family (identical purification circuit"
+        " applied at every hop) is already included in every"
+        " `beam_search` call above -- it's the \"reasonable default a"
+        ' practitioner would actually pick" without doing any'
+        " optimization, distinct from the paper's own hand-picked"
+        " `flexible_paper` demonstration schedule. Extracted here as its"
+        " own labeled comparison point for the first time:",
+        "",
+        "| e_d | Link cost | Link F | Link rate | Budget-relaxed improvement over link (%) |",
+        "|---|---|---|---|---|",
+    ]
+    for e_d in E_D_VALUES:
+        link = by_ed[e_d].get("link_level_baseline")
+        budget = by_ed[e_d]["optimizer_budget_relaxed"]
+        if link is None:
+            lines.append(f"| {e_d:.3f} | N/A | N/A | N/A | N/A |")
+            continue
+        link_improvement = (
+            (budget.rate / link.rate - 1.0) * 100.0 if link.rate else float("nan")
+        )
+        lines.append(
+            f"| {e_d:.3f} | {link.resource_cost} | {link.fidelity:.4f} |"
+            f" {link.rate:.2f} | {link_improvement:+.2f}% |"
+        )
+    _valid_link = [
+        (e_d, by_ed[e_d]["link_level_baseline"])
+        for e_d in E_D_VALUES
+        if by_ed[e_d].get("link_level_baseline") is not None
+        and by_ed[e_d]["link_level_baseline"].rate
+    ]
+    if _valid_link:
+        _link_improvements = [
+            (by_ed[e_d]["optimizer_budget_relaxed"].rate / link.rate - 1.0) * 100.0
+            for e_d, link in _valid_link
+        ]
+        lines += [
+            "",
+            "The budget-relaxed optimizer's rate improvement over the"
+            f" *link-level* baseline specifically ranges from"
+            f" {min(_link_improvements):+.1f}% to"
+            f" {max(_link_improvements):+.1f}% across the sweep -- distinct"
+            " from (and generally smaller than) its improvement over the"
+            " paper's `flexible_paper` demonstration schedule reported"
+            " above, since the link-level family is itself already a"
+            " reasonable, non-hand-picked default. The improvement is"
+            " exactly 0% at e_d=0.000 and e_d=0.008: at e_d=0.000 both"
+            " families reach the maximum possible rate (success_prob=1,"
+            " noiseless) despite different costs (raw chain, cost=20, vs."
+            " link-level's minimum cost=40, since the link-level family"
+            " always applies at least one purification round); at"
+            " e_d=0.008 the budget-relaxed optimizer's own global best"
+            " *is* the link-level candidate (`link.n2.YY`), making the"
+            " comparison trivially exact there.",
+        ]
+
+    lines += [
         "",
         "Full per-point data: [`results.csv`](results.csv) (long format,"
         " one row per `(e_d, variant)` pair) and"

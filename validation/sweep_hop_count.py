@@ -157,13 +157,30 @@ def run_one_point(N: int) -> list[Row]:
         if r.eval_result.resource_cost == paper.eval_result.resource_cost
     )
     budget = results[0]
+    # [Roadmap_Derisk_and_Reframe.md §4] the uniform link-level family
+    # (identical circuit sequence applied at every hop) -- the "reasonable
+    # default a practitioner would actually pick" -- was already unioned
+    # into `results` by `beam_search` but never extracted/reported on its
+    # own. `results` is sorted best-first, so the first `link.*`-labeled
+    # candidate within budget is the best uniform-link-level baseline.
+    link_best = next(
+        (
+            r
+            for r in results
+            if r.label.startswith("link.") and r.eval_result.resource_cost <= e_max
+        ),
+        None,
+    )
 
     rows = []
-    for variant, r in (
+    variants: list[tuple[str, object]] = [
         ("paper_baseline", paper),
         ("optimizer_matched_cost", matched),
         ("optimizer_budget_relaxed", budget),
-    ):
+    ]
+    if link_best is not None:
+        variants.append(("link_level_baseline", link_best))
+    for variant, r in variants:
         rows.append(
             Row(
                 N=N,
@@ -269,6 +286,11 @@ def write_improvement_csv(rows: list[Row], path: Path) -> None:
                 "budget_relaxed_rate_improvement_pct",
                 "budget_relaxed_cost_ratio",
                 "budget_relaxed_fidelity_delta",
+                "link_level_cost",
+                "link_level_fidelity",
+                "link_level_meets_floor",
+                "link_level_rate",
+                "budget_relaxed_vs_link_level_rate_improvement_pct",
             ]
         )
         for N in N_VALUES:
@@ -276,6 +298,7 @@ def write_improvement_csv(rows: list[Row], path: Path) -> None:
             paper = variants["paper_baseline"]
             matched = variants["optimizer_matched_cost"]
             budget = variants["optimizer_budget_relaxed"]
+            link = variants.get("link_level_baseline")
             writer.writerow(
                 [
                     N,
@@ -285,6 +308,15 @@ def write_improvement_csv(rows: list[Row], path: Path) -> None:
                     (budget.rate / paper.rate - 1.0) * 100.0,
                     budget.resource_cost / paper.resource_cost,
                     budget.fidelity - paper.fidelity,
+                    link.resource_cost if link else "",
+                    link.fidelity if link else "",
+                    link.meets_floor if link else "",
+                    link.rate if link else "",
+                    (
+                        (budget.rate / link.rate - 1.0) * 100.0
+                        if link and link.rate
+                        else ""
+                    ),
                 ]
             )
 
@@ -479,6 +511,64 @@ def write_readme(
 
     lines += [
         "",
+        "## Link-level baseline comparison [Roadmap_Derisk_and_Reframe.md \u00a74]",
+        "",
+        "The uniform link-level family (identical purification circuit"
+        " applied at every hop) is already included in every"
+        " `beam_search` call above -- it's the \"reasonable default a"
+        ' practitioner would actually pick" without doing any'
+        " optimization, distinct from the paper's own hand-picked"
+        " `flexible_paper` demonstration schedule. Extracted here as its"
+        " own labeled comparison point for the first time:",
+        "",
+        "| N | Link cost | Link F | Link meets floor | Link rate |"
+        " Budget-relaxed improvement over link (%) |",
+        "|---|---|---|---|---|---|",
+    ]
+    for N in N_VALUES:
+        link = by_n[N].get("link_level_baseline")
+        budget = by_n[N]["optimizer_budget_relaxed"]
+        if link is None:
+            lines.append(f"| {N} | N/A | N/A | N/A | N/A | N/A |")
+            continue
+        link_improvement = (
+            (budget.rate / link.rate - 1.0) * 100.0 if link.rate else float("nan")
+        )
+        lines.append(
+            f"| {N} | {link.resource_cost} | {link.fidelity:.4f} |"
+            f" {'Yes' if link.meets_floor else '**No**'} |"
+            f" {cell(link, f'{link.rate:.2f}')} |"
+            f" {cell(link, f'{link_improvement:+.2f}%')} |"
+        )
+    _valid_link_pairs = [
+        (N, by_n[N].get("link_level_baseline"))
+        for N in N_VALUES
+        if by_n[N].get("link_level_baseline") is not None
+        and by_n[N].get("link_level_baseline").meets_floor
+        and by_n[N]["optimizer_budget_relaxed"].meets_floor
+    ]
+    if _valid_link_pairs:
+        _link_improvements = [
+            (by_n[N]["optimizer_budget_relaxed"].rate / link.rate - 1.0) * 100.0
+            for N, link in _valid_link_pairs
+        ]
+        lines += [
+            "",
+            f"Among the N values where both the link-level baseline and the"
+            f" budget-relaxed optimizer are feasible"
+            f" ({', '.join(str(N) for N, _ in _valid_link_pairs)}), the"
+            f" budget-relaxed optimizer's rate improvement over the"
+            f" *link-level* baseline specifically ranges from"
+            f" {min(_link_improvements):+.1f}% to"
+            f" {max(_link_improvements):+.1f}% -- distinct from (and"
+            f" generally smaller than) its improvement over the paper's"
+            f" `flexible_paper` demonstration schedule reported above,"
+            f" since the link-level family is itself already a reasonable,"
+            f" non-hand-picked default.",
+        ]
+
+    lines += [
+        "",
         "## Observations",
         "",
     ]
@@ -565,6 +655,29 @@ def write_readme(
         obs_num += 1
 
     lines += [
+        "",
+        "**Addendum -- Observation 3 needs qualification.** Observation"
+        " 3's claim of \"no feasible schedule at all within the paper's"
+        ' own budget" describes what `dp_search`/`beam_search` can find,'
+        " not a true non-existence result. Per"
+        " [docs/Roadmap_Derisk_and_Reframe.md](../../docs/Roadmap_Derisk_and_Reframe.md)"
+        " \u00a71, a targeted check"
+        " ([outputs/excluded_move_n14_n18/README.md](../excluded_move_n14_n18/README.md))"
+        ' tried the specific "purify two independently-built same-span'
+        ' candidates at the join step" move that `dp_search` provably'
+        " excludes from its search (see"
+        " [docs/Optimality Scope.md](../../docs/Optimality%20Scope.md))."
+        " At N=18, this excluded move **does** find a feasible schedule"
+        " at exactly the paper's own budget (`e_max=180`): F=0.928596,"
+        " cost=180 -- clearing the floor that every variant in the table"
+        " above misses. So the correct statement is: the paper's own"
+        " linear budget formula (`10*N`) is *not* insufficient in"
+        " principle at N=18; it is only insufficient for the specific"
+        " schedule families `dp_search`/`beam_search` are able to reach."
+        " (At N=14 the same check also finds a feasible excluded-move"
+        " schedule, F=0.904348 at cost=116, but a feasible schedule"
+        " already existed there via `optimizer_matched_cost`, so this is"
+        " a secondary confirmation rather than a rescue.)",
         "",
         f"Full data: [`results.csv`](results.csv),"
         f" [`improvement_summary.csv`](improvement_summary.csv). Figures:"
