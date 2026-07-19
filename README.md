@@ -77,7 +77,7 @@ displayed/exported with the same tooling. See
 | File | Role |
 |---|---|
 | search/brute_force.py | `brute_force_search()` — exhaustive enumeration of three fixed structural families (raw, end-node pumping heralded/optimistic, uniform link-level pumping). Exact ground truth on small `N`. |
-| search/dp.py | `dp_search()` — memoized recursive search over span-partition structures (Bellman-style optimal-cost-to-go over the span partial order), with variable per-hop copy-count and arbitrary split points. Always a superset of `brute_force_search` on the same inputs. |
+| search/dp.py | `dp_search()` — memoized recursive search over span-partition structures (Bellman-style optimal-cost-to-go over the span partial order), with variable per-hop copy-count, arbitrary split points, and pumped (independently-purified) span pairs. Always a superset of `brute_force_search` on the same inputs. **Exact only for pumping-free schedules by default** — pumping's frontier is beam-limited for tractability, same tradeoff as `beam_search`, unless `exact_pumping=True` (uncapped, only tractable at very small `N`). See `search/dp.py`'s module docstring, "Exactness modes" section. |
 | search/report.py | `print_table`, `to_csv`, `to_json`, `save_result`, `load_result`, `save_top` — display/export utilities plus structural save/load helpers for `SearchResult` artifacts |
 | validation/search_results.py | CLI script: run either search algorithm and print/export the results |
 | validation/load_schedule.py | CLI script: load a saved schedule artifact, verify it, and visualize/export it |
