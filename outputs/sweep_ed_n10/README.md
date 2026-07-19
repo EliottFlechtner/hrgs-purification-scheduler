@@ -20,13 +20,27 @@ Network: `NetworkConfig.integrating_paper_config(e_d=e_d)` (N=10, l=2km, b=(16,1
 Matched-cost rate improvement: +0.0% at e_d=0.000, +2.5% at e_d=0.010.
 Budget-relaxed rate improvement: +0.0% at e_d=0.000, +65.5% at e_d=0.010 (spending 20/100 and 50/100 of the paper's cost, respectively).
 
+## Link-level baseline comparison [Roadmap_Derisk_and_Reframe.md §4]
+
+The uniform link-level family (identical purification circuit applied at every hop) is already included in every `beam_search` call above -- it's the "reasonable default a practitioner would actually pick" without doing any optimization, distinct from the paper's own hand-picked `flexible_paper` demonstration schedule. Extracted here as its own labeled comparison point for the first time:
+
+| e_d | Link cost | Link F | Link rate | Budget-relaxed improvement over link (%) |
+|---|---|---|---|---|
+| 0.000 | 40 | 1.0000 | 10000.00 | +0.00% |
+| 0.001 | 40 | 0.9868 | 9737.03 | +2.70% |
+| 0.002 | 40 | 0.9739 | 9481.32 | +5.47% |
+| 0.003 | 40 | 0.9613 | 9232.65 | +8.31% |
+| 0.004 | 40 | 0.9489 | 8990.83 | +11.22% |
+| 0.005 | 40 | 0.9368 | 8755.66 | +14.21% |
+| 0.006 | 40 | 0.9249 | 8526.95 | +10.02% |
+| 0.007 | 40 | 0.9133 | 8304.52 | +3.75% |
+| 0.008 | 40 | 0.9020 | 8088.20 | +0.00% |
+| 0.009 | 60 | 0.9408 | 6197.15 | +18.24% |
+| 0.010 | 60 | 0.9343 | 5877.42 | +14.22% |
+
+The budget-relaxed optimizer's rate improvement over the *link-level* baseline specifically ranges from +0.0% to +18.2% across the sweep -- distinct from (and generally smaller than) its improvement over the paper's `flexible_paper` demonstration schedule reported above, since the link-level family is itself already a reasonable, non-hand-picked default. The improvement is exactly 0% at e_d=0.000 and e_d=0.008: at e_d=0.000 both families reach the maximum possible rate (success_prob=1, noiseless) despite different costs (raw chain, cost=20, vs. link-level's minimum cost=40, since the link-level family always applies at least one purification round); at e_d=0.008 the budget-relaxed optimizer's own global best *is* the link-level candidate (`link.n2.YY`), making the comparison trivially exact there.
+
 Full per-point data: [`results.csv`](results.csv) (long format, one row per `(e_d, variant)` pair) and [`improvement_summary.csv`](improvement_summary.csv) (wide format, one row per `e_d`, with pre-computed % improvements).
-
-## Observations
-
-- **Zero-purification regime at low noise.** For `e_d <= ~0.004`, the budget-relaxed optimizer's global best is simply the **raw chain** (`cost=20` = 2 Gen nodes x N=10 hops, no purification at all), which already clears `f_min=0.9` on its own and gives the maximum possible rate (`10000`, i.e. `success_prob=1`). The paper's fixed 5-copy pumping structure (`cost=100`) is pure overhead in this regime — it doesn't fail, it just spends 5x the resources for a rate the raw chain already achieves. This is the sweep's clearest "design principle" finding: **purify only as much as the noise level actually requires**, not a fixed amount decided a priori.
-- **Budget-relaxed improvement grows with e_d, then plateaus.** From `0%` (e_d=0, no purification needed anywhere) up to `~65-67%` once `e_d >= 0.007` — once the raw chain alone can no longer clear the fidelity floor, the optimizer starts spending on purification exactly where it's needed (see the per-hop labels in `results.csv`, e.g. `link.n2.YY` at e_d=0.008 growing to a full 3-hop-per-copy `ZX_YY` pattern by e_d=0.010), tracking the same "shape purification to where fidelity is actually lost" pattern documented in `outputs/headline_experiment_n10/README.md`.
-- **Matched-cost curve is non-monotonic between e_d=0.003 and e_d=0.004** (dips to `+0.36%` after peaking at `+8.45%`), visible as a small dip in `fidelity_vs_ed.png` too. This is a real, explainable artifact of the **discrete** circuit-family search space, not a bug: at cost=100 the only candidates available are the four fixed `end_optimistic.n5.*` circuit-sequence families (`YY_YY_YY_YY`, `XZ_XZ_XZ_XZ`, `ZX_ZX_ZX_ZX`, mixed), and which one scores highest swaps abruptly as `e_d` crosses the point where their fidelity/success-probability tradeoffs cross — there is no continuous interpolation between them. Confirmed via the `label` column in `results.csv` (winner switches `YY_YY_YY_YY` -> `XZ_XZ_XZ_XZ` exactly at that crossover). Report language about this curve should describe it as "non-monotonic due to discrete circuit-family selection," not smooth.
 
 ## Figures
 
@@ -44,4 +58,4 @@ source .venv/bin/activate
 PYTHONPATH=src python3 validation/sweep_ed.py
 ```
 
-Total wall-clock time for the 11-point sweep: ~148s (11 `beam_search` calls, one per e_d point; `beam_search` reuses `brute_force_search`'s families internally, so no separate brute-force pass is needed).
+Total wall-clock time for the 11-point sweep: ~147s (11 `beam_search` calls, one per e_d point; `beam_search` reuses `brute_force_search`'s families internally, so no separate brute-force pass is needed).
