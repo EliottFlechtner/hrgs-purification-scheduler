@@ -17,7 +17,14 @@ from hrgs_scheduler.schedule.node import (
 )
 from hrgs_scheduler.schedule.dag import ScheduleDAG
 from hrgs_scheduler.schedule.evaluator import Evaluator, EvaluationResult
-from hrgs_scheduler.schedule.visualize import render, save_dot, to_dot
+from hrgs_scheduler.schedule.visualize import (
+    deepest_purification_chain,
+    pumping_highlight_groups,
+    purification_chain_depth,
+    render,
+    save_dot,
+    to_dot,
+)
 from hrgs_scheduler.schedule.serde import (
     dag_to_dict,
     dict_to_dag,
@@ -43,6 +50,9 @@ __all__ = [
     "to_dot",
     "save_dot",
     "render",
+    "purification_chain_depth",
+    "deepest_purification_chain",
+    "pumping_highlight_groups",
     "dag_to_dict",
     "dict_to_dag",
     "network_to_dict",
