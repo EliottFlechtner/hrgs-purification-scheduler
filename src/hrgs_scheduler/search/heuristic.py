@@ -18,11 +18,19 @@ turns the search from exponential-ish in N into polynomial in N for a
 fixed beam width, at the cost of no longer being provably exhaustive.
 
 This is deliberately NOT a from-scratch greedy/annealing implementation:
-reusing `_SpanPartitionSearch` means beam search and exact DP share 100%
-of their node-construction and evaluation code, so any result the beam
-search returns is a schedule the exact DP would also have considered had
-its frontier not been pruned early — there is no separate "heuristic
-model" that could silently diverge from the real physics.
+reusing `_SpanPartitionSearch` means beam search and `dp_search` share
+100% of their node-construction and evaluation code, so any result the
+beam search returns is a schedule `dp_search` would also have considered
+had its frontier not been pruned early — there is no separate
+"heuristic model" that could silently diverge from the real physics.
+
+**Important:** `dp_search`'s own "pumping" move (two independently-
+purified copies of the same span) is *also* beam-limited by default for
+tractability (see `search/dp.py`'s "Exactness modes" docstring section)
+-- so `dp_search`'s default output is NOT a guaranteed upper bound on
+`beam_search` once pumping is involved. Use `dp_search(...,
+exact_pumping=True)` (uncapped, only tractable at very small N) as the
+genuine ground truth when validating `beam_search` against it.
 
 Usage
 -----
@@ -33,9 +41,10 @@ results = beam_search(network, objective, e_max=200, beam_width=25)
 ```
 
 For large N (e.g. the paper's N=10 config), prefer this over `dp_search`
-directly; cross-check on small N (N <= 4-6) that `beam_search`'s best
-score matches or nearly matches `dp_search`'s exact best score before
-trusting it at scale (see `tests/test_heuristic.py`).
+directly; cross-check on small N (N <= 3-6) that `beam_search`'s best
+score matches or nearly matches `dp_search(..., exact_pumping=True)`'s
+genuinely exact best score before trusting it at scale (see
+`tests/test_heuristic.py`).
 """
 
 from __future__ import annotations
@@ -78,8 +87,9 @@ def beam_search(
         Maximum number of Gen nodes.
     beam_width : int
         Max number of candidates kept per span after Pareto-pruning.
-        Larger values approach exact-DP quality at higher cost; smaller
-        values run faster but may miss the true optimum. Default 25.
+        Larger values approach `dp_search`'s quality at higher cost;
+        smaller values run faster but may miss the true optimum.
+        Default 25.
     max_link_copies : int
         Cap on purification copy-count tried per span (default 3).
     max_enumerated_rounds : int
