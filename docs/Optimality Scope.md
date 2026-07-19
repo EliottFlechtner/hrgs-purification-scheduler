@@ -179,3 +179,41 @@ results: [outputs/excluded_move_n14_n18/README.md](../outputs/excluded_move_n14_
 - This remains an *existence* result from a bounded (`beam_width=25`)
   search, not a claim about how often or how easily this move helps in
   general — consistent with §5's scope limits above.
+
+## 7. Addendum — pumping fixes the symptom, but its own optimality can no longer be exactly verified, even at N=3
+
+After §1-6 above were written, `dp_search`/`beam_search` gained a real
+"pump" move inside `_SpanPartitionSearch` itself (see `search/dp.py`'s
+module docstring, "Pumping" and "Exactness modes" sections) that
+explores exactly the same-span-purification structure described in §3
+natively, instead of requiring a hand-built script. Re-running this
+document's own §4 example (`N=3`, `e_max=36`, `f_min=0.98`) after that
+integration:
+
+- `dp_search(net, obj, e_max=36)` (default settings) now finds a
+  feasible schedule (score=3737.34, fidelity=0.996656) where §4 showed
+  it previously found none — the infeasibility symptom is fixed.
+- That score is still ~0.7% below the excluded-move comparator's score
+  from §4 (3764.82), despite higher fidelity (0.996656 vs 0.989693).
+  Doubling the default pumping-pool beam width (25 → 50) barely moves
+  this (3737.34 → 3737.48, +0.004%), confirming the shortfall is not
+  simply an artifact of the default cap being slightly too narrow.
+- Attempting to resolve this by comparing against the genuinely
+  exhaustive `exact_pumping=True` mode, at this exact configuration
+  (`N=3`, `e_max=36`), **did not complete within 300 seconds** — no
+  result, even at `N=3`, the smallest problem size this document's own
+  counterexample uses.
+
+**This is a permanent, documented limitation, not an open bug to keep
+chasing**: pumping fixes the infeasibility symptom demonstrated in §4,
+but exact verification of pumping's own optimality is not achievable
+even at the smallest useful problem size. Practically: pumping-enabled
+results (the default for both `dp_search` and `beam_search`) should be
+understood as **heuristic outputs**, to be validated only by close
+agreement between independent heuristic methods run at matching
+settings (e.g. `dp_search` vs. `beam_search`), not by comparison against
+a genuine exact ground truth. `exact_pumping=True` is not a practical
+route to that ground truth beyond the very smallest budgets — and even
+there, its tractability depends steeply on the specific `budget_cap`
+used, not just on `N` (see `search/dp.py`'s module docstring), so "small
+N" alone does not guarantee it will finish in reasonable time.

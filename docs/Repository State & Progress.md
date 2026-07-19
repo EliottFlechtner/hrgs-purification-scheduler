@@ -12,7 +12,7 @@ this repo's own formal-model spec.
 operations, purification, decoherence) is verified correct term-by-term
 against both source papers and reproduces the paper's own published
 numbers to within floating-point precision for fidelity. The outer-loop
-optimizer (three search tiers: brute force, exact DP, beam-search
+optimizer (three search tiers: brute force, DP, beam-search
 heuristic) is implemented, cross-validated for internal consistency, and
 has already produced a genuine, reproducible result: **a discovered
 schedule beats the paper's own hand-picked Fig. 4 schedule at the same
@@ -175,8 +175,8 @@ DAG-derived approach.
 | Tier | File | Status |
 |---|---|---|
 | 1. Brute force | `brute_force.py` | Exhaustive enumeration over 3 fixed structural families (raw, end-node pumping heralded/optimistic, uniform link-level pumping) plus the paper's own `flexible_paper` schedule as a labeled candidate. Exact, tractable only for small `N`/`e_max`. |
-| 2. Exact DP | `dp.py` | `_SpanPartitionSearch.frontier(a,b)`: memoized recursive search over span-partition structures — tries every split point, keeps the full Pareto frontier (cost, fidelity, success_prob) per span, using multi-objective Pareto pruning (no single scalar composes correctly across a join, since joins multiply success probability and sum cost). Provably a superset of brute force. Combinatorially explodes past `N≈7` (empirically ~1,200+ candidates at width-7 spans for the paper's N=10 config). |
-| 3. Beam search (heuristic) | `heuristic.py` (added this session) | Reuses the *exact same* `_SpanPartitionSearch` machinery as exact DP (100% shared node-construction/physics code — no separate "heuristic model" that could diverge), but caps each span's frontier at a fixed `beam_width` via `_beam_select` instead of keeping every non-dominated candidate. Makes search tractable at the paper's actual N=10 config (~10-14s vs. DP's intractability). |
+| 2. DP (`dp_search`) | `dp.py` | `_SpanPartitionSearch.frontier(a,b)`: memoized recursive search over span-partition structures — tries every split point, keeps the full Pareto frontier (cost, fidelity, success_prob) per span, using multi-objective Pareto pruning (no single scalar composes correctly across a join, since joins multiply success probability and sum cost). Provably a superset of brute force. Combinatorially explodes past `N≈7` (empirically ~1,200+ candidates at width-7 spans for the paper's N=10 config). **Exact only for pumping-free schedules by default** — its "pumping" move (two independently-purified copies of the same span) is beam-limited for tractability, same tradeoff as beam search, unless `exact_pumping=True` (uncapped, only tractable at very small `N`; see `dp.py`'s "Exactness modes" docstring section). |
+| 3. Beam search (heuristic) | `heuristic.py` (added this session) | Reuses the same `_SpanPartitionSearch` machinery as `dp_search` (100% shared node-construction/physics code — no separate "heuristic model" that could diverge), but caps each span's frontier at a fixed `beam_width` via `_beam_select` instead of keeping every non-dominated candidate. Makes search tractable at the paper's actual N=10 config (~10-14s vs. DP's intractability). Since `dp_search`'s own pumping is now also beam-limited by default, `dp_search` is no longer a guaranteed upper bound on `beam_search` once pumping is involved — use `dp_search(..., exact_pumping=True)` at small `N` for that comparison instead. |
 
 **All three tiers build real `ScheduleDAG` nodes during search** (a
 shared node pool + `_extract_reachable` DFS filter per finalist) rather

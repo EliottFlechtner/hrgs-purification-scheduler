@@ -7,6 +7,18 @@ strictly more expressive, always a superset of brute force on the same
 inputs). This document explains what each algorithm searches, why the DP
 is structured the way it is, and what it deliberately does *not* cover.
 
+> **Note (added after this doc was written):** `dp_search()` later gained
+> a "pumping" move (two independently-purified copies of the same span,
+> see `search/dp.py`'s module docstring, "Pumping" and "Exactness modes"
+> sections). That move's own per-span frontier is beam-limited by
+> default for tractability — so `dp_search`'s output is only
+> unconditionally exact for the pumping-free split/join search described
+> in this document below; it is a bounded heuristic once pumping is
+> involved, unless called with `exact_pumping=True` (uncapped, only
+> tractable at very small `N`). The "superset of brute force" and
+> split/join exactness claims below are unaffected by this and remain
+> true as written.
+
 See [`Validated Formal Model Def.md`](Validated%20Formal%20Model%20Def.md#7-search-algorithm)
 §7 for the formal three-tier plan this implements, and
 [`WbW Plan.md`](WbW%20Plan.md) for the week-by-week schedule this
