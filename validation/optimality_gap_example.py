@@ -100,15 +100,37 @@ def build_network() -> NetworkConfig:
 
 def build_excluded_move_dag(net: NetworkConfig) -> ScheduleDAG:
     """Build the excluded move: purify(XZ, A, B) where A and B both cover
-    Span(0, N), from two genuinely independent node pools."""
+    Span(0, N), from two genuinely independent node pools.
+
+    Uses `enable_pumping=False`: this constructs two specific, known
+    non-pumped link-level building blocks (`LABEL_A`/`LABEL_B`) to then
+    manually purify together as the excluded move -- with the newly
+    integrated pumping move enabled, these exact candidates are (as
+    expected) now Pareto-dominated and pruned even from the fully
+    exhaustive (`exact_pumping=True`) frontier, because pumping finds a
+    genuinely better candidate at the same or lower cost (this is
+    evidence pumping is working correctly, not a bug). Since this
+    function only needs the original non-pumped building blocks
+    (verified still present and unaffected when pumping is disabled),
+    disabling pumping here is the correct, fast way to retrieve them --
+    see `dp.py`'s "Exactness modes" docstring section.
+    """
     search_a = _SpanPartitionSearch(
-        net, max_link_copies=3, max_enumerated_rounds=3, budget_cap=E_MAX * 2
+        net,
+        max_link_copies=3,
+        max_enumerated_rounds=3,
+        budget_cap=E_MAX * 2,
+        enable_pumping=False,
     )
     frontier_a = search_a.frontier(0, N)
     a = next(c for c in frontier_a if c.label == LABEL_A)
 
     search_b = _SpanPartitionSearch(
-        net, max_link_copies=3, max_enumerated_rounds=3, budget_cap=E_MAX * 2
+        net,
+        max_link_copies=3,
+        max_enumerated_rounds=3,
+        budget_cap=E_MAX * 2,
+        enable_pumping=False,
     )
     frontier_b = search_b.frontier(0, N)
     b = next(c for c in frontier_b if c.label == LABEL_B)
