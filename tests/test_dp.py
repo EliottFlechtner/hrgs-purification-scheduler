@@ -6,6 +6,7 @@ from hrgs_scheduler.cost_functions import ObjectiveConfig
 from hrgs_scheduler.models.network_config import NetworkConfig
 from hrgs_scheduler.search import SearchResult, brute_force_search, dp_search
 from hrgs_scheduler.search.dp import (
+    _DEFAULT_PUMP_POOL_WIDTH,
     _SpanCandidate,
     _SpanPartitionSearch,
     _dominates,
@@ -141,6 +142,50 @@ class TestSpanPartitionSearch:
         frontier = search.frontier(0, 3)
         for cand in frontier:
             assert cand.node_id in search.nodes
+
+    def test_exact_pumping_lifts_the_default_pumping_cap(self):
+        """`exact_pumping=True` must disable the pumping-related caps
+        entirely, so it should generate a much larger (fully exhaustive)
+        per-span frontier than the default, beam-limited pumping mode.
+
+        See `dp.py`'s "Exactness modes" docstring section: by default,
+        `dp_search`'s pumping is a bounded heuristic, not exact - this
+        test exists to confirm `exact_pumping=True` genuinely lifts that
+        bound rather than being a no-op.
+
+        Deliberately NOT using `ideal_net` here: its zero inner-error
+        params leave almost nothing to Pareto-prune, so the uncapped
+        exact frontier explodes to thousands of candidates and takes
+        minutes just to build at N=3. A network with nonzero inner error
+        (matching tests/test_heuristic.py's `uniform_net`) prunes far
+        more aggressively and stays fast while still clearly exceeding
+        the default cap.
+        """
+        net = NetworkConfig.uniform(
+            N=3,
+            length=2.0,
+            branching=(16, 14, 1),
+            arm_count=18,
+            p_x_inner=0.003,
+            p_z_inner=0.003,
+            e_d=0.01,
+            gamma=1e-3,
+            c=2e5,
+        )
+        capped = _SpanPartitionSearch(
+            net, max_link_copies=3, max_enumerated_rounds=3, budget_cap=18
+        )
+        exact = _SpanPartitionSearch(
+            net,
+            max_link_copies=3,
+            max_enumerated_rounds=3,
+            budget_cap=18,
+            exact_pumping=True,
+        )
+        capped_frontier = capped.frontier(0, 3)
+        exact_frontier = exact.frontier(0, 3)
+        assert len(capped_frontier) == _DEFAULT_PUMP_POOL_WIDTH
+        assert len(exact_frontier) > len(capped_frontier)
 
 
 # ---------------------------------------------------------------------------

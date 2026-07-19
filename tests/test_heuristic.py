@@ -21,25 +21,40 @@ def uniform_net(N: int, e_d: float = 0.01) -> NetworkConfig:
 
 
 class TestBeamSearchSmallN:
-    """Cross-check beam_search against exact dp_search on tractable N."""
+    """Cross-check beam_search against exact dp_search on tractable N.
+
+    IMPORTANT: `dp_search`'s *default* output is no longer a provable
+    upper bound on `beam_search` once pumping is involved (see
+    `search/dp.py`'s "Exactness modes" docstring section) - its own
+    per-span pumping cap is a beam-limited heuristic, same tradeoff
+    `beam_search` makes, just with a different default width. These two
+    tests specifically validate the "never beaten by exact DP" invariant,
+    so they must use `exact_pumping=True` (genuinely uncapped) as the
+    ground truth, not the default capped `dp_search`. That mode is only
+    fast at very small N, hence N=3 here rather than N=4 (this was
+    manually cross-checked at N=4, e_max=24 too: both sides scored
+    9241.0249 exactly, ~83s - too slow to run on every test invocation,
+    so not included as an automated test, but recorded here as
+    supporting evidence the invariant also holds at that size).
+    """
 
     def test_matches_exact_dp_best_score_with_generous_beam(self):
-        net = uniform_net(N=4)
+        net = uniform_net(N=3)
         obj = ObjectiveConfig.maximize_rate_with_fidelity_floor(f_min=0.9)
 
-        dp_results = dp_search(net, obj, e_max=24)
-        beam_results = beam_search(net, obj, e_max=24, beam_width=25)
+        dp_results = dp_search(net, obj, e_max=18, exact_pumping=True)
+        beam_results = beam_search(net, obj, e_max=18, beam_width=25)
 
         assert beam_results[0].score == dp_results[0].score
 
     def test_never_beats_exact_dp(self):
         """A beam-capped frontier can only be a subset of what exact DP
         considers, so its best score can never exceed the exact optimum."""
-        net = uniform_net(N=4)
+        net = uniform_net(N=3)
         obj = ObjectiveConfig.maximize_rate_with_fidelity_floor(f_min=0.9)
 
-        dp_results = dp_search(net, obj, e_max=24)
-        beam_results = beam_search(net, obj, e_max=24, beam_width=6)
+        dp_results = dp_search(net, obj, e_max=18, exact_pumping=True)
+        beam_results = beam_search(net, obj, e_max=18, beam_width=6)
 
         assert beam_results[0].score <= dp_results[0].score
 
