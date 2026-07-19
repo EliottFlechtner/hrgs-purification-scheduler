@@ -153,3 +153,29 @@ closing this gap (see §3's quoted scope-limit note).
   what the implemented search finds**, not as proof that no better
   schedule exists — as shown concretely above, "infeasible" can mean
   "infeasible for the searched families," not "infeasible in general."
+
+## 6. Addendum — the gap is not just theoretical at production scale either
+
+Per [docs/Roadmap_Derisk_and_Reframe.md](Roadmap_Derisk_and_Reframe.md)
+§1, a targeted (beam-limited, not exhaustive) check of this same
+excluded move was run at `N=14` and `N=18` — the two hop counts where
+[outputs/sweep_hop_count/README.md](../outputs/sweep_hop_count/README.md)
+reports the paper's own fixed-cost schedule and/or every schedule
+`dp_search`/`beam_search` can reach failing the fidelity floor. Full
+results: [outputs/excluded_move_n14_n18/README.md](../outputs/excluded_move_n14_n18/README.md).
+
+- **`N=18` (the actual infeasibility case in that sweep): rescued.** The
+  excluded move finds a valid schedule at exactly the paper's own
+  budget (`e_max=180`) with F=0.928596 — clearing the `f_min=0.9` floor
+  that every variant `sweep_hop_count` searched misses at that budget.
+  This means the earlier report of "no feasible schedule within the
+  paper's own budget at `N=18`" describes a limit of the *searched
+  families*, not a true resource-insufficiency result, exactly the
+  caveat this document's §5 anticipated.
+- **`N=14`: also finds a feasible excluded-move schedule** (F=0.904348
+  at cost 116), but a feasible schedule already existed there via
+  `optimizer_matched_cost` (F=0.9121), so this is a secondary
+  confirmation of the gap's reality at scale, not a rescue.
+- This remains an *existence* result from a bounded (`beam_width=25`)
+  search, not a claim about how often or how easily this move helps in
+  general — consistent with §5's scope limits above.
