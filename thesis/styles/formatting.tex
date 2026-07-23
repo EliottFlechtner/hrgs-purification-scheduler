@@ -1,0 +1,47 @@
+%==============================
+% Colours
+%==============================
+\definecolor{thesisblue}{RGB}{0,51,102}    % dark navy -- professional in print & screen
+\definecolor{titlerule}{RGB}{80,80,80}     % soft dark-grey rule on titlepage
+
+%==============================
+% Hyperlink colours
+%==============================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=thesisblue,
+    citecolor=thesisblue,
+    urlcolor=thesisblue
+}
+
+%==============================
+% Abstract (override report.cls which wraps in titlepage and resets \thepage)
+%==============================
+\renewenvironment{abstract}{%
+  \chapter*{\abstractname}%
+  \addcontentsline{toc}{chapter}{\abstractname}%
+}{%
+}
+
+%==============================
+% Running headers & footers (fancyhdr)
+%==============================
+\pagestyle{fancy}
+\fancyhf{}
+% Left header: chapter title (lower-case, no extra uppercase)
+\fancyhead[L]{\small\nouppercase{\leftmark}}
+% Right header: page number
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+% Footer: empty (logos belong on title page only)
+\renewcommand{\footrulewidth}{0pt}
+
+% Chapter-opening pages (plain style): page number centred, no rule
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\small\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}

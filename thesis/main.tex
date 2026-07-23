@@ -1,0 +1,43 @@
+\documentclass[11pt,a4paper]{report}
+
+\input{styles/packages}
+\input{styles/commands}
+\input{styles/formatting}
+
+\begin{document}
+
+% ---- Title page: unnumbered, no hyperref anchor (avoids page.i clash) ----
+\hypersetup{pageanchor=false}
+\pagestyle{empty}
+\input{frontmatter/titlepage}
+\hypersetup{pageanchor=true}
+
+% ---- Front matter: roman numerals ----
+\pagenumbering{roman}
+\pagestyle{plain}
+\clearpage
+\input{frontmatter/abstract}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+% ---- Main matter: arabic numerals, running headers ----
+\pagenumbering{arabic}
+\pagestyle{fancy}
+
+\include{chapters/01_introduction}
+\include{chapters/02_background}
+\include{chapters/03_related_work}
+\include{chapters/04_method}
+\include{chapters/05_experiments}
+\include{chapters/06_results}
+\include{chapters/07_discussion}
+\include{chapters/08_conclusion}
+
+\printbibliography
+
+\appendix
+\include{chapters/appendix}
+
+\end{document}

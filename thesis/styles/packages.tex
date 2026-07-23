@@ -1,0 +1,156 @@
+%==============================
+% Encoding & Typography
+%==============================
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}      % Not strictly necessary with modern LaTeX
+\usepackage{lmodern}
+\usepackage{svg}
+\usepackage{microtype}
+\microtypesetup{nopatch=footnote}  % suppress patch failure warning on some engines
+\usepackage{csquotes}
+
+% Silence siunitx's physics-package warning while keeping the RenewCommandCopy fix.
+\ExplSyntaxOn
+\msg_redirect_name:nnn { siunitx } { physics-pkg } { none }
+\ExplSyntaxOff
+
+%==============================
+% Mathematics
+%==============================
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{bm}                  % Bold math symbols
+\usepackage{braket}              % Alternative bra-ket notation
+\usepackage{siunitx}
+\usepackage{physics}             % \ket \bra \dv \pdv etc. (loads after siunitx to avoid its physics warning)
+\AtBeginDocument{\RenewCommandCopy\qty\SI}  % keep siunitx's \qty despite physics package
+
+%==============================
+% Graphics
+%==============================
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{tikz}
+\usetikzlibrary{
+    positioning,
+    arrows.meta,
+    calc,
+    shapes,
+    decorations.pathreplacing,
+    fit
+}
+
+%==============================
+% Tables
+%==============================
+
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{threeparttable}
+\usepackage{makecell}
+
+%==============================
+% Algorithms
+%==============================
+
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+
+%==============================
+% Source code
+%==============================
+
+\usepackage{listings}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    tabsize=4
+}
+
+%==============================
+% References
+%==============================
+
+\usepackage[
+    backend=biber,
+    style=ieee,
+    sorting=none,
+    giveninits=true
+]{biblatex}
+
+\addbibresource{bibliography/references.bib}
+
+%==============================
+% Hyperlinks
+%==============================
+
+\usepackage{hyperref}
+\usepackage{bookmark}  % generate PDF bookmarks in one pass
+\usepackage[nameinlink]{cleveref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfauthor={Eliott FLECHTNER},
+    pdftitle={Master Thesis}
+}
+
+%==============================
+% Page layout
+%==============================
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+%==============================
+% Appendix
+%==============================
+
+\usepackage[toc,page]{appendix}
+
+%==============================
+% Lists
+%==============================
+
+\usepackage{enumitem}
+
+%==============================
+% Misc
+%==============================
+
+\usepackage{comment}
+\usepackage{xspace}
+\usepackage{url}
+
+%==============================
+% Acronyms
+%==============================
+
+\usepackage[acronym]{glossaries}
+
+%==============================
+% PDF inclusion
+%==============================
+
+\usepackage{pdfpages}
