@@ -1,5 +1,5 @@
 """
-validation/sweep_hop_count.py
+experiments/sweep_hop_count.py
 ================================
 Roadmap item 3: generalize the single-point headline experiment
 (`outputs/headline_experiment_n10/`) across the number of repeater hops
@@ -65,7 +65,7 @@ Outputs
 
 Usage
 -----
-    PYTHONPATH=src python3 validation/sweep_hop_count.py
+    PYTHONPATH=src python3 experiments/sweep_hop_count.py
 """
 
 from __future__ import annotations
@@ -721,7 +721,7 @@ def write_readme(
         "```bash",
         "cd /home/shark/Documents/hrgs-purification-scheduler",
         "source .venv/bin/activate",
-        "PYTHONPATH=src python3 validation/sweep_hop_count.py",
+        "PYTHONPATH=src python3 experiments/sweep_hop_count.py",
         "```",
         "",
         f"Total wall-clock time for this script: ~{elapsed_s:.0f}s.",

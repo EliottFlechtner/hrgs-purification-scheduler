@@ -1,5 +1,5 @@
 """
-validation/fig6_rate_ratio.py
+experiments/fig6_rate_ratio.py
 ==============================
 Reproduce [Integrating, Fig. 6]: relative distribution rate between the
 raw, baseline, and flexible (purification-enhanced) schemes vs. e_d.
@@ -46,7 +46,7 @@ values (P_success) are exact reproductions of the paper's model
 
 Usage
 -----
-    python3 validation/fig6_rate_ratio.py
+    python3 experiments/fig6_rate_ratio.py
 """
 
 import sys

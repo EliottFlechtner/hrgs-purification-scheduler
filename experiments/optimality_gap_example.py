@@ -1,5 +1,5 @@
 """
-validation/optimality_gap_example.py
+experiments/optimality_gap_example.py
 =======================================
 Concrete counterexample for [docs/Optimality Scope.md].
 
@@ -37,7 +37,7 @@ before evaluating.
 
 Usage
 -----
-    PYTHONPATH=src python3 validation/optimality_gap_example.py
+    PYTHONPATH=src python3 experiments/optimality_gap_example.py
 """
 
 from __future__ import annotations

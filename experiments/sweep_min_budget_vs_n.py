@@ -1,5 +1,5 @@
 """
-validation/sweep_min_budget_vs_n.py
+experiments/sweep_min_budget_vs_n.py
 =====================================
 `docs/Roadmap_Derisk_and_Reframe.md`, §2: the scaling-law question. At
 each `N` in `N_VALUES`, find the *smallest* `e_max` at which
@@ -61,8 +61,8 @@ Outputs
 
 Usage
 -----
-    PYTHONPATH=src nohup python3 -u validation/sweep_min_budget_vs_n.py \\
-      > validation/sweep_min_budget_vs_n.log 2>&1 &
+    PYTHONPATH=src nohup python3 -u experiments/sweep_min_budget_vs_n.py \\
+      > experiments/sweep_min_budget_vs_n.log 2>&1 &
 """
 
 from __future__ import annotations
@@ -523,7 +523,7 @@ def write_readme(
     lines.append("```bash")
     lines.append("cd /home/shark/Documents/hrgs-purification-scheduler")
     lines.append("source .venv/bin/activate")
-    lines.append("PYTHONPATH=src python3 -u validation/sweep_min_budget_vs_n.py")
+    lines.append("PYTHONPATH=src python3 -u experiments/sweep_min_budget_vs_n.py")
     lines.append("```")
     lines.append("")
     lines.append(f"Total wall-clock time: ~{total_elapsed:.0f}s.")

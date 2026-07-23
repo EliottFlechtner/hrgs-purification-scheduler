@@ -1,5 +1,5 @@
 """
-validation/sweep_beam_width.py
+experiments/sweep_beam_width.py
 ================================
 Roadmap item 2: characterize beam_search's quality/runtime tradeoff as a
 function of `beam_width`, and cross-check its quality against exact DP
@@ -50,7 +50,7 @@ Outputs
 
 Usage
 -----
-    PYTHONPATH=src python3 validation/sweep_beam_width.py
+    PYTHONPATH=src python3 experiments/sweep_beam_width.py
 """
 
 from __future__ import annotations
@@ -348,7 +348,7 @@ def write_readme(
         "```bash",
         "cd /home/shark/Documents/hrgs-purification-scheduler",
         "source .venv/bin/activate",
-        "PYTHONPATH=src python3 validation/sweep_beam_width.py",
+        "PYTHONPATH=src python3 experiments/sweep_beam_width.py",
         "```",
         "",
         f"Total wall-clock time for this script: ~{total_elapsed:.0f}s.",

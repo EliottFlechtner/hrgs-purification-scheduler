@@ -1,30 +1,30 @@
 """
-validation/search_results.py
+experiments/search_results.py
 ==============================
 Run brute-force schedule search and export / display the results.
 
 Quick start
 -----------
     # Print table to terminal (paper config, default objective)
-    python validation/search_results.py
+    python experiments/search_results.py
 
     # Tighter noise, higher fidelity floor, export CSV + JSON
-    python validation/search_results.py --e_d 0.01 --f_min 0.92 \\
+    python experiments/search_results.py --e_d 0.01 --f_min 0.92 \\
         --csv outputs/search/run_ed01.csv \\
         --json outputs/search/run_ed01.json
 
     # Custom N with uniform network, maximize raw fidelity
-    python validation/search_results.py --N 3 --uniform \\
+    python experiments/search_results.py --N 3 --uniform \\
         --objective fidelity --e_max 30
 
     # Show only feasible results, cap at top 20
-    python validation/search_results.py --top 20 --no-infeasible
+    python experiments/search_results.py --top 20 --no-infeasible
 
     # Use the DP-over-stages search (superset of brute force) instead
-    python validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24
+    python experiments/search_results.py --algorithm dp --N 4 --uniform --e_max 24
 
     # Save the top-3 schedules as loadable structural artifacts
-    python validation/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \\
+    python experiments/search_results.py --algorithm dp --N 4 --uniform --e_max 24 \\
         --save-top 3 --save-dir outputs/schedules/dp_n4
 
 CLI flags

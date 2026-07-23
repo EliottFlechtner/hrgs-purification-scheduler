@@ -1,5 +1,5 @@
 """
-validation/visualize_pumping_schedule.py
+experiments/visualize_pumping_schedule.py
 ===========================================
 docs/Handoff_Timing_and_Pumping_Visualization.md, Part 2: find and render
 a real search-found schedule that uses pumping with a deeper
@@ -44,7 +44,7 @@ Outputs
 
 Usage
 -----
-    PYTHONPATH=src python3 validation/visualize_pumping_schedule.py
+    PYTHONPATH=src python3 experiments/visualize_pumping_schedule.py
 """
 
 from __future__ import annotations

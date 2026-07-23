@@ -1,5 +1,5 @@
 """
-validation/sweep_timing_with_pumping.py
+experiments/sweep_timing_with_pumping.py
 ==========================================
 docs/Handoff_Timing_and_Pumping_Visualization.md, Part 1: real wall-clock
 timing numbers for `dp_search`/`beam_search`, both with pumping enabled
@@ -57,10 +57,10 @@ Usage
 -----
     cd /home/shark/Documents/hrgs-purification-scheduler
     source .venv/bin/activate
-    setsid nohup env PYTHONPATH=src python3 -u validation/sweep_timing_with_pumping.py \\
-        > validation/sweep_timing_with_pumping.log 2>&1 < /dev/null &
-    echo $! > validation/sweep_timing_with_pumping.pid
-    tail -f validation/sweep_timing_with_pumping.log
+    setsid nohup env PYTHONPATH=src python3 -u experiments/sweep_timing_with_pumping.py \\
+        > experiments/sweep_timing_with_pumping.log 2>&1 < /dev/null &
+    echo $! > experiments/sweep_timing_with_pumping.pid
+    tail -f experiments/sweep_timing_with_pumping.log
 """
 
 from __future__ import annotations

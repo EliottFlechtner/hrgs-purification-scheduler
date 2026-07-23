@@ -1,5 +1,5 @@
 """
-validation/fig5_fidelity_vs_noise.py
+experiments/fig5_fidelity_vs_noise.py
 =====================================
 Reproduce [Integrating, Fig. 5]: fidelity F vs. outer-qubit depolarizing
 error probability e_d for the paper's exact network configuration:
@@ -29,7 +29,7 @@ Expected results (read from Fig. 5, e_d=0.01)
 
 Usage
 -----
-    python3 validation/fig5_fidelity_vs_noise.py
+    python3 experiments/fig5_fidelity_vs_noise.py
 
 Optional matplotlib output: set PLOT=True below.
 """

@@ -1,5 +1,5 @@
 """
-validation/excluded_move_at_scale.py
+experiments/excluded_move_at_scale.py
 =======================================
 Roadmap "De-risking" doc, item 1: targeted excluded-move check at N=14
 and N=18 -- the two points where [outputs/sweep_hop_count/README.md]
@@ -9,7 +9,7 @@ failing the floor (N=14), at the paper's own budget `e_max = 10*N`.
 This is NOT a general attempt to close the DP gap documented in
 [docs/Optimality Scope.md] (that remains out of scope). It is a narrow,
 targeted spot-check reusing the exact technique validated at N=3 in
-`validation/optimality_gap_example.py`: build two independently-searched
+`experiments/optimality_gap_example.py`: build two independently-searched
 candidates that both cover the full span, and purify them together via
 each of {YY, ZX, XZ} -- a move `dp_search`/`beam_search` never take
 themselves (see Optimality Scope.md, §3).
@@ -68,7 +68,7 @@ Outputs
 
 Usage
 -----
-    PYTHONPATH=src python3 -u validation/excluded_move_at_scale.py
+    PYTHONPATH=src python3 -u experiments/excluded_move_at_scale.py
 """
 
 from __future__ import annotations
@@ -104,7 +104,7 @@ N_VALUES = [14, 18]
 CIRCUITS = (PurificationCircuit.YY, PurificationCircuit.ZX, PurificationCircuit.XZ)
 
 # Per-hop config fixed at the paper's own values, matching
-# validation/sweep_hop_count.py exactly (only N varies).
+# experiments/sweep_hop_count.py exactly (only N varies).
 _LENGTH = 2.0
 _BRANCHING = (16, 14, 1)
 _ARM_COUNT = 18
@@ -458,7 +458,7 @@ def write_readme(rows: list[ExcludedMoveResult], total_elapsed: float) -> None:
         "```bash",
         "cd /home/shark/Documents/hrgs-purification-scheduler",
         "source .venv/bin/activate",
-        "PYTHONPATH=src python3 -u validation/excluded_move_at_scale.py",
+        "PYTHONPATH=src python3 -u experiments/excluded_move_at_scale.py",
         "```",
         "",
         f"Total wall-clock time: ~{total_elapsed:.0f}s.",

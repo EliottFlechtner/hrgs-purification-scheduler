@@ -1,5 +1,5 @@
 """
-validation/load_schedule.py
+experiments/load_schedule.py
 ==============================
 Load a saved schedule artifact (written by ``--save-top`` or
 ``search.save_result``) and inspect, verify, or visualize it.
@@ -7,21 +7,21 @@ Load a saved schedule artifact (written by ``--save-top`` or
 Quick start
 -----------
     # Print a summary of a saved schedule
-    python validation/load_schedule.py outputs/schedules/rank_001_<label>.json
+    python experiments/load_schedule.py outputs/schedules/rank_001_<label>.json
 
     # Re-evaluate (re-runs the evaluator and checks against stored metrics)
-    python validation/load_schedule.py outputs/schedules/rank_001_<label>.json --verify
+    python experiments/load_schedule.py outputs/schedules/rank_001_<label>.json --verify
 
     # Render the schedule DAG to an SVG (requires Graphviz)
-    python validation/load_schedule.py outputs/schedules/rank_001_<label>.json \\
+    python experiments/load_schedule.py outputs/schedules/rank_001_<label>.json \\
         --render outputs/schedules/rank_001.svg
 
     # Annotate the render with per-node fidelity / time values
-    python validation/load_schedule.py outputs/schedules/rank_001_<label>.json \\
+    python experiments/load_schedule.py outputs/schedules/rank_001_<label>.json \\
         --render outputs/schedules/rank_001_annotated.svg --annotate
 
     # Save the DOT source (no Graphviz needed)
-    python validation/load_schedule.py outputs/schedules/rank_001_<label>.json \\
+    python experiments/load_schedule.py outputs/schedules/rank_001_<label>.json \\
         --dot outputs/schedules/rank_001.dot
 
 CLI flags

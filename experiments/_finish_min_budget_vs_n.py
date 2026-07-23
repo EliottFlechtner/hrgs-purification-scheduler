@@ -3,7 +3,7 @@ One-off resume script: the original `sweep_min_budget_vs_n.py` background
 run was killed mid-way through N=18's upward exponential search (VS Code
 crash killed the owning terminal/process group despite `nohup`). N=10,
 12, 14, 16 had already fully completed and their final log lines are
-hardcoded below (verified against `validation/sweep_min_budget_vs_n.log`)
+hardcoded below (verified against `experiments/sweep_min_budget_vs_n.log`)
 so they don't need to be recomputed. Only N=18 is re-run from scratch
 (cheap relative to the ~20 minutes already spent on N=10-16).
 """

@@ -1,5 +1,5 @@
 """
-validation/sweep_min_budget_vs_ed.py
+experiments/sweep_min_budget_vs_ed.py
 =======================================
 `docs/Roadmap_Derisk_and_Reframe.md`, §3: reframe `sweep_ed`'s existing
 percent-improvement framing into the stronger claim: minimum resource
@@ -45,7 +45,7 @@ Outputs
 
 Usage
 -----
-    PYTHONPATH=src python3 -u validation/sweep_min_budget_vs_ed.py
+    PYTHONPATH=src python3 -u experiments/sweep_min_budget_vs_ed.py
 """
 
 from __future__ import annotations
@@ -383,7 +383,7 @@ def write_readme(results: list[MinBudgetEdResult], elapsed_s: float) -> None:
         "```bash",
         "cd /home/shark/Documents/hrgs-purification-scheduler",
         "source .venv/bin/activate",
-        "PYTHONPATH=src python3 -u validation/sweep_min_budget_vs_ed.py",
+        "PYTHONPATH=src python3 -u experiments/sweep_min_budget_vs_ed.py",
         "```",
         "",
         f"Total wall-clock time: ~{elapsed_s:.0f}s.",

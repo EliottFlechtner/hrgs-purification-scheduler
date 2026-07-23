@@ -1,5 +1,5 @@
 """
-validation/sweep_ed.py
+experiments/sweep_ed.py
 ========================
 Roadmap item 1: generalize the single-point headline experiment
 (`outputs/headline_experiment_n10/`) into a sweep across the paper's full
@@ -43,7 +43,7 @@ Outputs
 
 Usage
 -----
-    PYTHONPATH=src python3 validation/sweep_ed.py
+    PYTHONPATH=src python3 experiments/sweep_ed.py
 """
 
 from __future__ import annotations
@@ -311,7 +311,7 @@ def write_readme(rows: list[Row], elapsed_s: float) -> None:
         "",
         f"Grid: `e_d in {{{', '.join(f'{v:.3f}' for v in E_D_VALUES)}}}`"
         f" ({len(E_D_VALUES)} points), matching the granularity used by"
-        " `validation/fig5_fidelity_vs_noise.py` / `fig6_rate_ratio.py`.",
+        " `experiments/fig5_fidelity_vs_noise.py` / `fig6_rate_ratio.py`.",
         "",
         "Network: `NetworkConfig.integrating_paper_config(e_d=e_d)` (N=10,"
         " l=2km, b=(16,14,1), k=18 arms — the paper's exact config, only"
@@ -418,7 +418,7 @@ def write_readme(rows: list[Row], elapsed_s: float) -> None:
         "```bash",
         "cd /home/shark/Documents/hrgs-purification-scheduler",
         "source .venv/bin/activate",
-        "PYTHONPATH=src python3 validation/sweep_ed.py",
+        "PYTHONPATH=src python3 experiments/sweep_ed.py",
         "```",
         "",
         f"Total wall-clock time for the 11-point sweep: ~{elapsed_s:.0f}s"
