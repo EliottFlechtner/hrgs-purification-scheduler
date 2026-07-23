@@ -65,7 +65,7 @@ circuits (YY, ZX, XZ). Because `purify()`'s success-probability formula
 assumes independent inputs, the second copy is never reused as-is: its
 entire reachable subtree is cloned with fresh node IDs (`_clone_candidate`,
 using the same disjoint-node-id technique validated in
-`validation/optimality_gap_example.py` and `validation/
+`experiments/optimality_gap_example.py` and `experiments/
 excluded_move_at_scale.py`) before it is purified against the first.
 Two things keep this tractable and non-recursive-without-bound:
 
@@ -116,7 +116,7 @@ very small N (empirically N=2-3 fast, N=4 can take minutes). This mode
 exists specifically to validate that the default *capped* `dp_search`
 and `beam_search` both still track the true optimum closely at sizes
 small enough to check directly — the same role
-`validation/sweep_beam_width.py`'s DP cross-check already plays for
+`experiments/sweep_beam_width.py`'s DP cross-check already plays for
 beam_search alone, extended to also cover dp_search's own pumping cap.
 Do not use `exact_pumping=True` as a general-purpose search mode.
 
@@ -296,8 +296,8 @@ def _remap_node(node: ScheduleNode, remap: dict[NodeId, NodeId]) -> ScheduleNode
 
     Used by `_SpanPartitionSearch._clone_candidate` to build a fresh,
     node-id-disjoint clone of a candidate's subtree — the same technique
-    validated in `validation/optimality_gap_example.py` and
-    `validation/excluded_move_at_scale.py`, reused here rather than
+    validated in `experiments/optimality_gap_example.py` and
+    `experiments/excluded_move_at_scale.py`, reused here rather than
     re-derived so the search can apply it inline.
     """
     field_names = {f.name for f in fields(node)}

@@ -18,7 +18,7 @@ import pathlib
 
 import pytest
 
-VALIDATION_DIR = pathlib.Path(__file__).resolve().parents[1] / "validation"
+VALIDATION_DIR = pathlib.Path(__file__).resolve().parents[1] / "experiments"
 
 
 def _import_validation_module(filename: str):

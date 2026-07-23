@@ -2,7 +2,7 @@
 hrgs_scheduler.reporting
 ==========================
 Report-support utilities: shared plotting helpers (`plots.py`) used by
-every sweep script under `validation/` so figures share one consistent
+every sweep script under `experiments/` so figures share one consistent
 visual language (colors, markers, DPI, output formats) instead of each
 sweep script rolling its own one-off `matplotlib` code.
 

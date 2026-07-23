@@ -50,7 +50,7 @@ Highlighting a pumping move
 labeled, colored cluster subgraphs on top of the normal type-based
 color/shape coding — used to make a pumping move's two independent
 copies visually obvious as distinct subtrees converging into one
-``Purify-*`` node (see ``validation/visualize_pumping_schedule.py``).
+``Purify-*`` node (see ``experiments/visualize_pumping_schedule.py``).
 
 Purification chain depth
 --------------------------

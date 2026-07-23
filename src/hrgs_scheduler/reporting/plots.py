@@ -2,7 +2,7 @@
 hrgs_scheduler.reporting.plots
 ================================
 Shared plotting helpers for every report-bound figure produced under
-`validation/` and `outputs/`.
+`experiments/` and `outputs/`.
 
 Rationale [Roadmap: Remaining Work, item 4]: sweep scripts 1-3 (e_d
 sweep, beam_width sweep, N sweep) and the earlier Fig. 5/6 reproduction

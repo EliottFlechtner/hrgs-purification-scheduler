@@ -7,7 +7,7 @@ NOTE: as of the Fig. 6 validation fix, the *authoritative* source of
 rate/latency numbers is no longer this standalone closed-form module but
 ``Evaluator.evaluate(dag).rate`` / ``.latency``, computed directly from
 the schedule DAG's own Herald/Purify structure (see
-``validation/fig6_rate_ratio.py`` and the ``herald()`` docstring in
+``experiments/fig6_rate_ratio.py`` and the ``herald()`` docstring in
 ``operations/backbone.py``). This module remains useful as an independent
 analytical cross-check and for quick what-if calculations without
 building a full DAG, but should agree with the DAG-derived values for the
