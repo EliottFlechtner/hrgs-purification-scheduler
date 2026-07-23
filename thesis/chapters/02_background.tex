@@ -1,0 +1,92 @@
+\chapter{Background and Preliminaries}
+\label{chap:background}
+
+\section{Quantum Networks and Repeaters}
+\label{sec:bg:networks}
+
+\subsection{Bell Pairs and Entanglement Distribution}
+\label{sec:bg:bellpairs}
+
+A Bell pair is an entangled two-qubit state shared between two nodes. The
+canonical Bell state is
+\[
+    |\Phi^+\rangle = \frac{1}{\sqrt{2}}\bigl(|00\rangle + |11\rangle\bigr).
+\]
+\TODO{Describe generation via photonic links, heralded Bell-state measurement
+(BSM), and the role of fidelity as the key quality metric.}
+
+\subsection{Half-RGS Repeater Architecture}
+\label{sec:bg:hrgs}
+
+\TODO{Define the half-resource-graph-state (half-RGS) building block,
+the all-photonic Bell-state analyser (ABSA), and how $N$-hop chains are
+assembled by joining two half-RGSs at a central node.}
+
+\subsection{Backbone Selection and Z Side-Effect Propagation}
+\label{sec:bg:backbone}
+
+\TODO{Explain forced backbone selection at each ABSA, the
+$\kappa$ span notation $(a,b)$, and why Z measurement outcomes propagate
+as a constant 2-bit/ABSA/trial classical overhead.}
+
+\section{Error Representation}
+\label{sec:bg:errors}
+
+\subsection{The Error Vector}
+\label{sec:bg:errorvec}
+
+\TODO{Define $\mathbf{e} = (w, x, y, z)^\top$ as the Pauli-channel
+component vector. Explain what each component represents and why this
+representation is closed under all operations in the model.}
+
+\subsection{Z Side-Effect Algebra}
+\label{sec:bg:sideffects}
+
+\TODO{Define parity accumulation, the XOR rule across BSM outcomes,
+and how the scheduling layer propagates side-effect corrections.}
+
+\subsection{Decoherence Model}
+\label{sec:bg:decoherence}
+
+While idle, an edge's error vector relaxes toward the maximally mixed
+state:
+\[
+    \mathbf{e}(t) = \tfrac{1}{4}\mathbf{1} +
+    e^{-\gamma t}\bigl(\mathbf{e}(t_0) - \tfrac{1}{4}\mathbf{1}\bigr).
+\]
+\TODO{Discuss the memory coherence time $T_2 = 1/\gamma$, why corrections
+are applied locally at every node rather than as a global lump, and the
+three canonical timing scenarios (raw, baseline, optimistic).}
+
+\section{Entanglement Purification}
+\label{sec:bg:purification}
+
+\subsection{Purification Circuits: YY, ZX, and XZ}
+\label{sec:bg:circuits}
+
+\TODO{Describe the three two-to-one purification protocols and which
+error type each is designed to detect.}
+
+\subsection{Success Probabilities and Output States}
+\label{sec:bg:purmath}
+
+The success probability and purified output for each circuit~\cite{bencha2025integrating} are:
+\begin{align}
+    P_{ZX}(\mathbf{e}_1,\mathbf{e}_2)
+        &= (w_1+x_1)(w_2+x_2)+(z_1+y_1)(z_2+y_2), \label{eq:pzx}\\
+    P_{XZ}(\mathbf{e}_1,\mathbf{e}_2)
+        &= (w_1+z_1)(w_2+z_2)+(x_1+y_1)(x_2+y_2), \label{eq:pxz}\\
+    P_{YY}(\mathbf{e}_1,\mathbf{e}_2)
+        &= (w_1+y_1)(w_2+y_2)+(x_1+z_1)(x_2+z_2). \label{eq:pyy}
+\end{align}
+\TODO{Write out the corresponding output vectors and discuss the
+legality constraint (both inputs must share the same span $\kappa$).}
+
+\subsection{Heralded versus Optimistic Purification}
+\label{sec:bg:optimistic}
+
+\TODO{Explain the optimistic (blind) execution model: generation and
+purification are pipelined without waiting for heralding; classical
+outcomes are compared in a single round at the end. Show how the
+position of \texttt{Herald} nodes in the schedule DAG determines
+whether a branch is heralded or optimistic.}

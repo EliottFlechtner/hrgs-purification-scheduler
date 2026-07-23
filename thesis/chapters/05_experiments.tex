@@ -1,0 +1,49 @@
+\chapter{Algorithms and Implementation}
+\label{chap:algorithms}
+
+\section{DAG Evaluator}
+\label{sec:alg:evaluator}
+
+\TODO{Describe the inner-loop pass that walks the schedule DAG, applies
+each operation to the current state, accumulates decoherence, and returns
+the final $(\mathbf{e}, P_{\mathrm{success}}, T_{\mathrm{gen}})$ triple.
+Explain validation against the three canonical closed-form benchmarks.}
+
+\section{Brute-Force Search}
+\label{sec:alg:bruteforce}
+
+\TODO{Define the four fixed families
+(\texttt{raw}, \texttt{end\_heralded}, \texttt{end\_optimistic},
+\texttt{link\_level}, \texttt{flexible\_paper})
+and the enumeration strategy. State the exact scope of what brute force
+covers and its computational cost.}
+
+\section{Dynamic-Programming Search}
+\label{sec:alg:dp}
+
+\TODO{Present the \texttt{SpanPartitionSearch} recursion: leaf-level
+(per-hop link purification with variable copies and circuit sequence)
+and recursive-level (join across disjoint sub-spans). Describe
+Pareto-frontier pruning on $(\mathrm{cost}, F, P_{\mathrm{success}})$.}
+
+\section{Heuristic Beam Search}
+\label{sec:alg:beam}
+
+\TODO{Describe the outer-loop beam search that extends the DP with
+a configurable beam width. Motivate when it is needed (large $N$,
+large budget) and its runtime complexity.}
+
+\section{Cost Functions}
+\label{sec:alg:cost}
+
+\TODO{Define the two cost functions used to rank candidates:
+$C_{\mathrm{fid}}$ (infidelity subject to throughput constraint) and
+$C_{\mathrm{rate}}$ (effective rate subject to fidelity floor). Show how
+each maps to one of the objectives from~\Cref{sec:model:objectives}.}
+
+\section{Software Architecture}
+\label{sec:alg:software}
+
+\TODO{Brief description of the Python package \texttt{hrgs\_scheduler}:
+module layout, key interfaces (\texttt{NetworkConfig}, \texttt{ScheduleDAG},
+\texttt{ResourceBudget}), serialisation, and test coverage.}

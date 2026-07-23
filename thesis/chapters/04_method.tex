@@ -1,0 +1,62 @@
+\chapter{Formal Model and Problem Statement}
+\label{chap:model}
+
+\section{Network Configuration}
+\label{sec:model:network}
+
+\TODO{Define the physical parameters: number of hops $N$, per-photon
+loss and gate error rates, memory coherence time, and the half-RGS
+branching factor. Explain which parameters are fixed in this work and
+which are swept in experiments.}
+
+\section{State Space}
+\label{sec:model:state}
+
+Each edge is represented by a state object
+\[
+    S = \bigl(\mathbf{e},\; s,\; t,\; t_{\mathrm{gen}},\; \kappa,\; r,\; h\bigr),
+\]
+where $\mathbf{e}$ is the error vector, $s$ the accumulated Z side-effect
+parity, $t$ and $t_{\mathrm{gen}}$ the current and generation times,
+$\kappa \in \{\mathrm{RGSS}\} \cup \{\mathrm{Span}(a,b)\}$ the span,
+$r$ the number of purification rounds applied, and $h \in
+\{\mathrm{pending}, \mathrm{resolved}\}$ the heralding status.
+\TODO{Motivate each field and state the \emph{legality constraint}: two
+states may be purified together only if they share the same $\kappa$.}
+
+\section{Schedule as a Formal Object}
+\label{sec:model:schedule}
+
+\subsection{DAG Representation}
+\label{sec:model:dag}
+
+\TODO{Define a schedule $\Sigma = (T, \phi)$ as a directed acyclic graph
+whose nodes are typed operations
+(\texttt{Generate}, \texttt{Join}, \texttt{Purify}, \texttt{Herald},
+\texttt{PauliCorrect}, \texttt{Idle}, \texttt{Discard})
+and whose edges encode data dependencies. Explain the semantics of
+each node type.}
+
+\subsection{Canonical Timing Scenarios}
+\label{sec:model:timing}
+
+\TODO{Reproduce the three closed-form generation- and memory-time
+expressions from the Integrating paper (raw, baseline, optimistic) and
+show they are special cases of the general DAG evaluator.}
+
+\section{Objective Functions and Resource Budget}
+\label{sec:model:objectives}
+
+\TODO{Define the resource budget $M_{\max}$ (maximum number of
+half-RGSs consumed per trial). State the two candidate objectives:
+(1)~fidelity subject to a throughput floor, and
+(2)~throughput subject to a fidelity floor $F \ge 0.9$.}
+
+\section{Optimality Scope and Known Limitations}
+\label{sec:model:scope}
+
+\TODO{State precisely what the DP recursion finds natively
+(per-hop link-level purification with variable copies and circuits,
+stitched by span-partition joins) and the one excluded move
+(purifying two independently produced copies of the same multi-hop span).
+Reference the brute-force families that cover the gap.}
