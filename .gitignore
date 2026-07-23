@@ -13,6 +13,8 @@
 *.lof
 *.lot
 *.pdf
+# Allow PDF figures committed explicitly inside thesis/figures/
+!thesis/figures/**/*.pdf
 
 # VSCode settings
 .vscode/
