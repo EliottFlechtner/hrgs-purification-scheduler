@@ -1,6 +1,6 @@
-# hrgs-purification-scheduler
+# entanglement-purification-scheduler
 
-Simulator and optimizer for purification scheduling on half-RGS-based
+Simulator and optimizer for entanglement purification scheduling on half-RGS-based
 all-photonic quantum repeaters.
 
 ## Repository layout
@@ -19,8 +19,7 @@ hrgs-purification-scheduler/
 ```
 
 See `docs/Validated Formal Model Def.md` for the full formal spec
-(`Σ = (T, φ)`, backbone + scheduling layers, cost functions) and
-`docs/WbW Plan.md` for the week-by-week project plan.
+(`Σ = (T, φ)`, backbone + scheduling layers, cost functions).
 
 ## Weeks 1-2: inner loop — **done**
 

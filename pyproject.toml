@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hrgs-scheduler"
+name = "entanglement-purification-scheduler"
 version = "0.1.0"
-description = "Simulator and optimizer for purification scheduling on HRGS-based quantum repeaters"
+description = "Simulator and optimizer for entanglement purification scheduling on half-RGS-based quantum repeaters"
 requires-python = ">=3.11"
 dependencies = []   # pure-stdlib for the inner loop; matplotlib is opt-in (see [plotting])
 

@@ -40,13 +40,13 @@ Run only DP + serializer tests:
 Fig. 5 fidelity-vs-noise:
 
 ```bash
-python3 validation/fig5_fidelity_vs_noise.py
+python3 experiments/fig5_fidelity_vs_noise.py
 ```
 
 Fig. 6 rate-ratio:
 
 ```bash
-python3 validation/fig6_rate_ratio.py
+python3 experiments/fig6_rate_ratio.py
 ```
 
 ## 3) Search CLI basics
@@ -54,13 +54,13 @@ python3 validation/fig6_rate_ratio.py
 Default run (brute force, paper config):
 
 ```bash
-python3 validation/search_results.py
+python3 experiments/search_results.py
 ```
 
 Brute force with custom budget/fidelity floor:
 
 ```bash
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm brute_force \
   --e_max 30 \
   --f_min 0.92
@@ -69,7 +69,7 @@ python3 validation/search_results.py \
 DP run on small uniform network:
 
 ```bash
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm dp \
   --N 4 \
   --uniform \
@@ -80,13 +80,13 @@ python3 validation/search_results.py \
 Show only feasible rows:
 
 ```bash
-python3 validation/search_results.py --top 20 --no-infeasible
+python3 experiments/search_results.py --top 20 --no-infeasible
 ```
 
 See all CLI flags:
 
 ```bash
-python3 validation/search_results.py --help
+python3 experiments/search_results.py --help
 ```
 
 ## 4) Exporting summary tables
@@ -94,7 +94,7 @@ python3 validation/search_results.py --help
 Export CSV and JSON summary metrics (rank/label/F/R/C/L/P/score):
 
 ```bash
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm dp \
   --N 4 \
   --uniform \
@@ -111,7 +111,7 @@ Use section 5 to save loadable schedule artifacts.
 Save top-k results as full structural artifacts (DAG + network + eval scalars):
 
 ```bash
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm dp \
   --N 4 \
   --uniform \
@@ -133,13 +133,13 @@ outputs/schedules/dp_n4/rank_002_<label>.json
 Print summary of one saved schedule artifact:
 
 ```bash
-python3 validation/load_schedule.py outputs/schedules/dp_n4/rank_001_*.json
+python3 experiments/load_schedule.py outputs/schedules/dp_n4/rank_001_*.json
 ```
 
 Re-evaluate and verify stored metrics vs fresh evaluator output:
 
 ```bash
-python3 validation/load_schedule.py \
+python3 experiments/load_schedule.py \
   outputs/schedules/dp_n4/rank_001_*.json \
   --verify
 ```
@@ -147,7 +147,7 @@ python3 validation/load_schedule.py \
 Also print node-type counts:
 
 ```bash
-python3 validation/load_schedule.py \
+python3 experiments/load_schedule.py \
   outputs/schedules/dp_n4/rank_001_*.json \
   --verify --print-nodes
 ```
@@ -157,7 +157,7 @@ python3 validation/load_schedule.py \
 Export DOT source only:
 
 ```bash
-python3 validation/load_schedule.py \
+python3 experiments/load_schedule.py \
   outputs/schedules/dp_n4/rank_001_*.json \
   --dot outputs/schedules/dp_n4/rank_001.dot
 ```
@@ -165,7 +165,7 @@ python3 validation/load_schedule.py \
 Render SVG:
 
 ```bash
-python3 validation/load_schedule.py \
+python3 experiments/load_schedule.py \
   outputs/schedules/dp_n4/rank_001_*.json \
   --render outputs/schedules/dp_n4/rank_001.svg
 ```
@@ -173,7 +173,7 @@ python3 validation/load_schedule.py \
 Render annotated SVG (includes per-node fidelity/time):
 
 ```bash
-python3 validation/load_schedule.py \
+python3 experiments/load_schedule.py \
   outputs/schedules/dp_n4/rank_001_*.json \
   --render outputs/schedules/dp_n4/rank_001_annotated.svg \
   --annotate
@@ -182,7 +182,7 @@ python3 validation/load_schedule.py \
 Render PNG instead of SVG:
 
 ```bash
-python3 validation/load_schedule.py \
+python3 experiments/load_schedule.py \
   outputs/schedules/dp_n4/rank_001_*.json \
   --render outputs/schedules/dp_n4/rank_001.png
 ```
@@ -192,7 +192,7 @@ python3 validation/load_schedule.py \
 Limit DP recursion to only span-partition candidates (exclude merged brute-force families):
 
 ```bash
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm dp \
   --N 4 \
   --uniform \
@@ -203,7 +203,7 @@ python3 validation/search_results.py \
 Control per-span copy-count and circuit enumeration budget:
 
 ```bash
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm dp \
   --N 4 \
   --uniform \
@@ -217,7 +217,7 @@ python3 validation/search_results.py \
 Disable specific brute-force families:
 
 ```bash
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm brute_force \
   --no-heralded \
   --no-optimistic \
@@ -227,7 +227,7 @@ python3 validation/search_results.py \
 Cap purification copy-count in brute force:
 
 ```bash
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm brute_force \
   --max-n-pur 5
 ```
@@ -236,14 +236,14 @@ python3 validation/search_results.py \
 
 ```bash
 # 1) Run DP search and save top 3 artifacts
-python3 validation/search_results.py \
+python3 experiments/search_results.py \
   --algorithm dp --N 4 --uniform --e_max 24 \
   --save-top 3 --save-dir outputs/schedules/run1
 
 # 2) Verify top artifact
-python3 validation/load_schedule.py outputs/schedules/run1/rank_001_*.json --verify --print-nodes
+python3 experiments/load_schedule.py outputs/schedules/run1/rank_001_*.json --verify --print-nodes
 
 # 3) Export visualization
-python3 validation/load_schedule.py outputs/schedules/run1/rank_001_*.json \
+python3 experiments/load_schedule.py outputs/schedules/run1/rank_001_*.json \
   --render outputs/schedules/run1/rank_001.svg --annotate
 ```
