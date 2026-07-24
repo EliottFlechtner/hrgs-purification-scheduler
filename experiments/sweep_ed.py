@@ -20,7 +20,7 @@ For each e_d:
 `e_max=100` is the paper's own resource cost (5 half-RGS copies/side/hop
 x 2 sides x N=10 hops), so this single search call yields all three
 schedules needed for the resource-normalized comparison at once (no
-separate brute-force call needed — `beam_search` already includes
+separate brute-force call needed; `beam_search` already includes
 `brute_force_search`'s fixed families by default):
 
   * `paper_baseline`            : the `flexible_paper` candidate (cost=100, fixed).
@@ -233,7 +233,7 @@ def make_plots(rows: list[Row]) -> None:
         rate_series,
         xlabel=r"Depolarizing error probability $e_d$",
         ylabel="Rate (score, pairs/s-equivalent)",
-        title="Rate vs. $e_d$ — paper baseline vs. optimizer (N=10)",
+        title="Rate vs. $e_d$: paper baseline vs. optimizer (N=10)",
     )
     save_figure(fig, OUTPUT_DIR / "rate_vs_ed")
 
@@ -243,7 +243,7 @@ def make_plots(rows: list[Row]) -> None:
         fidelity_series,
         xlabel=r"Depolarizing error probability $e_d$",
         ylabel="Fidelity $F$",
-        title=f"Fidelity vs. $e_d$ — paper baseline vs. optimizer (N=10, $f_{{min}}$={F_MIN})",
+        title=f"Fidelity vs. $e_d$: paper baseline vs. optimizer (N=10, $f_{{min}}$={F_MIN})",
     )
     ax.axhline(
         F_MIN, color="black", linewidth=0.8, linestyle=":", label=f"$f_{{min}}$={F_MIN}"
@@ -314,12 +314,12 @@ def write_readme(rows: list[Row], elapsed_s: float) -> None:
         " `experiments/fig5_fidelity_vs_noise.py` / `fig6_rate_ratio.py`.",
         "",
         "Network: `NetworkConfig.integrating_paper_config(e_d=e_d)` (N=10,"
-        " l=2km, b=(16,14,1), k=18 arms — the paper's exact config, only"
+        " l=2km, b=(16,14,1), k=18 arms, the paper's exact config, only"
         f" e_d varies). Objective: `maximize_rate_with_fidelity_floor(f_min={F_MIN})`."
         f" Search: `beam_search(net, obj, e_max={E_MAX}, beam_width={BEAM_WIDTH})`"
         f" (`e_max={E_MAX}` = paper's own resource cost, so a single call"
         " yields the paper baseline, matched-cost, and budget-relaxed"
-        " candidates all at once — `beam_search` always includes"
+        " candidates all at once; `beam_search` always includes"
         " `brute_force_search`'s fixed families, so `flexible_paper` and"
         " the matched-cost family are present regardless of beam pruning).",
         "",

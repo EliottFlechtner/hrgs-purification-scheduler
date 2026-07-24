@@ -242,7 +242,7 @@ def main() -> None:
         )
 
     feasible = [r for r in results if r.score > float("-inf")]
-    print(f"Done — {len(results)} candidates evaluated, {len(feasible)} feasible.\n")
+    print(f"Done: {len(results)} candidates evaluated, {len(feasible)} feasible.\n")
 
     print_table(results, top=args.top, show_infeasible=not args.no_infeasible)
 

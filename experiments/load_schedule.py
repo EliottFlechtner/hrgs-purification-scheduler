@@ -201,7 +201,7 @@ def main() -> int:
             print("\nAll metrics match within 1e-9.")
         else:
             print(
-                "\nVerification FAILED — stored metrics differ from re-evaluation.",
+                "\nVerification FAILED: stored metrics differ from re-evaluation.",
                 file=sys.stderr,
             )
             return 1

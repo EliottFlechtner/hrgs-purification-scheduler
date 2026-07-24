@@ -328,7 +328,7 @@ def write_readme(results: list[MinBudgetEdResult], elapsed_s: float) -> None:
             if r.min_feasible_e_max < 0
             else str(r.min_feasible_e_max)
         )
-        ratio_str = "—" if r.min_feasible_e_max < 0 else f"{r.ratio_to_paper:.3f}x"
+        ratio_str = "N/A" if r.min_feasible_e_max < 0 else f"{r.ratio_to_paper:.3f}x"
         lines.append(
             f"| {r.e_d:.3f} | {r.paper_e_max} | {min_str} | {ratio_str} |"
             f" {r.best_fidelity:.4f} | {r.best_label} |"

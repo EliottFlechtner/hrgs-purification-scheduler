@@ -449,7 +449,7 @@ def write_readme(
         if r.min_feasible_e_max < 0:
             lines.append(
                 f"| {r.N} | {r.paper_e_max} | **not found** (gave up at "
-                f"{_MAX_UPWARD_MULTIPLE}x paper's budget) | — | "
+                f"{_MAX_UPWARD_MULTIPLE}x paper's budget) | N/A | "
                 f"{r.best_fidelity:.4f} | {r.best_label} |"
             )
         else:

@@ -7,15 +7,15 @@ on spans small enough for `dp_search` to remain tractable.
 
 Two parts
 ----------
-1. **Main sweep** (paper's config: N=10, e_d=0.01, e_max=100 — same
+1. **Main sweep** (paper's config: N=10, e_d=0.01, e_max=100, same
    config as `sweep_ed.py`'s e_d=0.01 point, for consistency): sweep
    `beam_width` and record wall-clock time + best schedule found. This
    answers "how much does a wider beam cost, and does quality keep
    improving." `beam_width` grid: `{1, 2, 4, 8, 16, 25, 32}` (25 is the
    codebase's existing default). Widths >= 64 were tested manually before
    writing this script and found impractical (> 2 minutes and still
-   running at width=64, vs. 28.6s at width=32 and 12.0s at width=25 —
-   see "Practical ceiling" in the generated README) — the frontier-join
+   running at width=64, vs. 28.6s at width=32 and 12.0s at width=25;
+   see "Practical ceiling" in the generated README); the frontier-join
    step is at least quadratic in `beam_width` per span, and this compounds
    across O(N) split points and O(N^2) spans, so this module does not
    attempt widths beyond 32 at N=10.
@@ -35,7 +35,7 @@ arguments and the full ordered `(label, score)` sequence is compared.
 `hrgs_scheduler`'s search tier uses no `random`/hashing-order-dependent
 iteration anywhere (verified by inspection: no `import random` in
 `src/`, all orderings come from `sorted()` with explicit keys or
-insertion-ordered dicts) — this check exists to confirm that in practice,
+insertion-ordered dicts); this check exists to confirm that in practice,
 not just by code inspection, and the result is recorded in the README so
 report methodology text can state the search is deterministic (no error
 bars needed) rather than a reviewer having to assume otherwise.
@@ -267,12 +267,12 @@ def write_readme(
         "",
         (
             "This confirms `beam_search` is fully deterministic for a fixed"
-            " config — there is no `random`/hash-order dependence anywhere"
+            " config: there is no `random`/hash-order dependence anywhere"
             " in the search tier (verified by code inspection: no"
             " `import random` in `src/hrgs_scheduler`; all result ordering"
             " comes from `sorted()` with explicit keys or insertion-ordered"
             " dicts). **No repeated runs / error bars are needed** for any"
-            " sweep in this report — a single run per config point is"
+            " sweep in this report; a single run per config point is"
             " sufficient and reproducible bit-for-bit."
             if deterministic
             else (
@@ -284,7 +284,7 @@ def write_readme(
             )
         ),
         "",
-        "## Part 1: Main sweep (N=10, e_d=0.01, e_max=100 — paper's config)",
+        "## Part 1: Main sweep (N=10, e_d=0.01, e_max=100, paper's config)",
         "",
         "| beam_width | Time (s) | Best cost | Best fidelity | Best success prob | Best rate |",
         "|---|---|---|---|---|---|",
@@ -300,12 +300,12 @@ def write_readme(
         "`beam_width=32` took 28.6s (vs. 12.0s at the codebase's default"
         " `beam_width=25`, and 0.14s at `beam_width=1`). `beam_width=64` was"
         " tested manually before writing this script and did not finish in"
-        " over 2 minutes — it was killed rather than timed exactly. The"
+        " over 2 minutes; it was killed rather than timed exactly. The"
         " frontier-join step (`_SpanPartitionSearch.frontier`) combines every"
         " left-frontier candidate with every right-frontier candidate at each"
         " of the O(N) split points of each of the O(N^2) spans, so cost is at"
         " least quadratic in `beam_width` per span and compounds across the"
-        " whole span tree — this is why the grid above stops at 32 rather than"
+        " whole span tree; this is why the grid above stops at 32 rather than"
         " reaching the higher powers of two originally suggested"
         " (`{1,...,64,...}`). **Recommendation for the report**: state the"
         " practical ceiling at N=10 as `beam_width ~= 32`, and note that"
@@ -333,7 +333,7 @@ def write_readme(
         "",
         f"At N={CROSSCHECK_N}, beam_search reaches the exact DP optimum"
         f" (gap = 0%) at beam_width={min((r.beam_width for r in cc_rows if r.gap_pct <= 1e-9), default='N/A')}"
-        " or above — the pruning heuristic loses essentially nothing once"
+        " or above; the pruning heuristic loses essentially nothing once"
         " the beam is wide enough to hold this span's full non-dominated"
         " frontier. This is consistent with `dp_search` returning the same"
         " candidate set beam_search draws from (they share"
