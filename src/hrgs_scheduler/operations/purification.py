@@ -22,9 +22,9 @@ Post-purification error vectors (conditional on success):
 
 Physical meaning of each circuit [Integrating, §V-B]
 -----------------------------------------------------
-ZX  — detects Z errors on qubit B of the *second* copy.
-XZ  — detects Z errors on qubit A of the *second* copy.
-YY  — detects an odd number of Z errors across all four qubits (best at
+ZX: detects Z errors on qubit B of the *second* copy.
+XZ: detects Z errors on qubit A of the *second* copy.
+YY: detects an odd number of Z errors across all four qubits (best at
        catching the ZI/IZ bias produced by inner-qubit measurements).
 
 Legality
@@ -158,7 +158,7 @@ def purify(
     Returns
     -------
     PurificationResult
-        (output_state, success_prob) — the post-purification state and
+        (output_state, success_prob): the post-purification state and
         the probability that the measurement succeeded.
 
     Raises

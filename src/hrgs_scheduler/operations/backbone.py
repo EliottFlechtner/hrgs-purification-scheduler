@@ -4,18 +4,18 @@ hrgs_scheduler.operations.backbone
 Backbone-layer operation functions.
 
 These implement the physical operations of the HRGS protocol that are
-**not** search variables — they are fixed by the underlying architecture
+**not** search variables; they are fixed by the underlying architecture
 [Bridging + Integrating].
 
 Catalog [Validated Formal Model Def, §2.5]
 ------------------------------------------
-Gen         — half-RGS generation.  Produces an RGSS-local State.
-join        — Join/EntSwap.  Composes two States via BSM composition rule.
-absa_bsm    — Outer-photon BSM at the ABSA.  Same math as join; creates a
+Gen:          half-RGS generation.  Produces an RGSS-local State.
+join:         Join/EntSwap.  Composes two States via BSM composition rule.
+absa_bsm:     Outer-photon BSM at the ABSA.  Same math as join; creates a
               single-hop edge from two RGSS-local States.
-idle        — Apply decoherence to a State over Δt.
-herald      — Resolve the heralding status of a State.
-pauli_correct — Terminal: verify legality and return the final edge.
+idle:         Apply decoherence to a State over Δt.
+herald:       Resolve the heralding status of a State.
+pauli_correct: Terminal; verify legality and return the final edge.
 
 Notes
 -----
@@ -64,7 +64,7 @@ def gen(
     inside ``absa_bsm`` when the photon travels to the ABSA.
 
     The RGSS-local error vector therefore reflects only inner-qubit errors,
-    applied as an independent Z-type channel on the ANCHOR only — the outer
+    applied as an independent Z-type channel on the ANCHOR only; the outer
     photon carries no error yet [Bridging, §VI.D]. Per [Validated Formal
     Model Def, §2.4]: "the inner-qubit term contributes no ZZ error", so
     the second marginal probability passed to ``from_independent_z_flips``
