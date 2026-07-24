@@ -13,7 +13,7 @@ optimal-cost-to-go computation, memoized by span:
                     achievable for ONE resource at Span(a, b)
 
 built bottom-up from single hops.  Each span's frontier is computed once
-and reused by every wider span built on top of it — the actual asymptotic
+and reused by every wider span built on top of it; the actual asymptotic
 win over brute force, which re-evaluates whole end-to-end schedules from
 scratch for every candidate rather than sharing hop-level/sub-span work.
 
@@ -40,7 +40,7 @@ Multi-objective (Pareto) DP, not a single-objective Bellman recursion
 ----------------------------------------------------------------------
 A schedule's FINAL score depends on fidelity, success probability
 (→ rate), AND resource cost jointly, and combining two branches multiplies
-success probabilities and sums costs — so a single scalar "value" per
+success probabilities and sums costs, so a single scalar "value" per
 state would not compose correctly across joins.  Instead, each state
 (a, b) stores a *Pareto frontier*: the set of (cost, fidelity,
 success_prob) triples not dominated by any other candidate at that span.
@@ -59,8 +59,8 @@ Pumping: two independent copies of the same span, purified together
 ---------------------------------------------------------------------
 In addition to "split at m and join the two halves", `frontier(a, b)`
 also considers "pump": take two candidates already known for THIS SAME
-span (a, b) — drawn from this span's own pre-pump frontier, i.e. before
-any pumping is applied — and purify them together with each of the three
+span (a, b), drawn from this span's own pre-pump frontier, i.e. before
+    any pumping is applied, and purify them together with each of the three
 circuits (YY, ZX, XZ). Because `purify()`'s success-probability formula
 assumes independent inputs, the second copy is never reused as-is: its
 entire reachable subtree is cloned with fresh node IDs (`_clone_candidate`,
@@ -71,7 +71,7 @@ Two things keep this tractable and non-recursive-without-bound:
 
   * Pump inputs are drawn only from this span's PRE-pump frontier (the
     ordinary leaf/join candidates), never from pump candidates already
-    produced for this same span — so a span pumps at most once. Its
+    produced for this same span, so a span pumps at most once. Its
     children may still be pump results from narrower spans (pumping
     composes across spans via ordinary joins), but a single span never
     pumps its own pumped output.
@@ -79,13 +79,13 @@ Two things keep this tractable and non-recursive-without-bound:
     contribution to the final frontier (its output) are beam-limited to
     at most `max_frontier_size` (under `beam_search`) or
     `_DEFAULT_PUMP_POOL_WIDTH` (under `dp_search`, which otherwise has
-    no beam width of its own) — never the full exact Pareto set. Both
+    no beam width of its own), never the full exact Pareto set. Both
     caps are needed: capping only the pairing pool still lets pump's
     O(pool^2) output balloon the *stored* per-span frontier, which then
     compounds combinatorially at every join built on top of it
     (confirmed empirically: even N=4 failed to finish in 20s with only
     the pairing pool capped). Capping pump's contribution keeps its
-    per-span cost — and the frontier size it feeds forward — bounded by
+    per-span cost and the frontier size it feeds forward, bounded by
     a constant, regardless of recursion depth. This makes `dp_search`'s
     *pumping* move a bounded heuristic rather than exact, same tradeoff
     `beam_search` already makes for its whole frontier; `dp_search`'s
@@ -98,7 +98,7 @@ limit, matching what has actually been validated so far.
 Exactness modes: `dp_search`'s pumping is heuristic by default
 ------------------------------------------------------------------
 **Important, do not assume otherwise:** once pumping is enabled (the
-default), `dp_search` is no longer provably exact — the beam-limiting
+default), `dp_search` is no longer provably exact; the beam-limiting
 above means its per-span frontier can, in principle, drop a candidate
 that some `beam_search` configuration happens to keep, so `dp_search`'s
 default output is NOT a guaranteed upper bound on every `beam_search`
@@ -109,26 +109,26 @@ enumeration (`enable_pumping=False`, not exposed publicly, or any
 schedule that happens not to involve a pump move).
 
 For a genuine, fully-exhaustive ground truth, pass `exact_pumping=True`
-to `dp_search`/`_SpanPartitionSearch` — this lifts every pumping-related
+to `dp_search`/`_SpanPartitionSearch`; this lifts every pumping-related
 cap (pairing pool, pump's own contribution, final frontier) entirely,
 restoring full exactness at the cost of tractability: usable only at
 very small N (empirically N=2-3 fast, N=4 can take minutes). This mode
 exists specifically to validate that the default *capped* `dp_search`
 and `beam_search` both still track the true optimum closely at sizes
-small enough to check directly — the same role
+small enough to check directly; the same role
 `experiments/sweep_beam_width.py`'s DP cross-check already plays for
 beam_search alone, extended to also cover dp_search's own pumping cap.
 Do not use `exact_pumping=True` as a general-purpose search mode.
 
 **Even "very small N" is not a reliable safety margin on its own**:
 `exact_pumping=True`'s cost scales steeply with `budget_cap`
-independently of `N` — confirmed at `N=3`, `budget_cap=24` finished in
+independently of `N`; confirmed at `N=3`, `budget_cap=24` finished in
 ~37s but `budget_cap=36` did not finish within 300s. Practically, this
 means `exact_pumping=True` cannot be relied on as a general ground-truth
 check even at `N=3`; it must be tried at the *specific* `budget_cap`
 needed, with no guarantee it will finish. See `docs/Optimality Scope.md`
 §7 for a worked example where this made pumping's own optimality
-unverifiable even in the smallest counterexample in this repo — the
+unverifiable even in the smallest counterexample in this repo; the
 practical conclusion there is that pumping-enabled results should be
 validated by agreement between independent heuristic methods (e.g.
 `dp_search` vs. `beam_search` at matching settings), not by exact
@@ -145,7 +145,7 @@ Cross-check
 -----------
 Because `dp_search` returns the UNION of this module's span-partition
 candidates and `brute_force_search`'s three families, `dp_search(...)`
-is always a superset of `brute_force_search(...)` on the same inputs —
+is always a superset of `brute_force_search(...)` on the same inputs;
 the exact cross-check relationship called for in the WbW plan.
 """
 
@@ -194,7 +194,7 @@ class _SpanCandidate:
     node_id : NodeId
         Root node of this candidate's subtree in the shared node pool.
     state : State
-        The resulting State (error vector, side effects, times) — a pure
+        The resulting State (error vector, side effects, times): a pure
         value, safe to reuse/reference from multiple parent candidates.
     cost : int
         Number of Gen leaves in this candidate's subtree.
@@ -256,7 +256,7 @@ def _beam_select(
 
     A single ranking is not safe here: at a single hop, fidelity is
     always close to 1 regardless of purification, so any fidelity-floor
-    filter is trivially satisfied at that scale — ranking purely by
+    filter is trivially satisfied at that scale; ranking purely by
     success_prob (i.e. preferring cheap/unpurified candidates) would then
     discard every purified sub-candidate at low spans, even though
     composing many such spans (e.g. N=10 hops) is exactly what later
@@ -268,7 +268,7 @@ def _beam_select(
     for wide spans that need it) and half for the highest-success_prob
     candidates (so cheap/efficient candidates survive for spans that
     already comfortably clear the floor). This is a heuristic, not an
-    exactness guarantee — see module docstring.
+    exactness guarantee; see module docstring.
     """
     if len(candidates) <= beam_width:
         return candidates
@@ -295,7 +295,7 @@ def _remap_node(node: ScheduleNode, remap: dict[NodeId, NodeId]) -> ScheduleNode
     """Return a copy of *node* with node_id and any children remapped.
 
     Used by `_SpanPartitionSearch._clone_candidate` to build a fresh,
-    node-id-disjoint clone of a candidate's subtree — the same technique
+    node-id-disjoint clone of a candidate's subtree, using the same technique
     validated in `experiments/optimality_gap_example.py` and
     `experiments/excluded_move_at_scale.py`, reused here rather than
     re-derived so the search can apply it inline.
@@ -409,8 +409,8 @@ class _SpanPartitionSearch:
         """Clone *candidate*'s entire reachable subtree with fresh node IDs.
 
         Guarantees the clone shares zero node_ids (in particular zero Gen
-        nodes) with anything already in ``self.nodes`` — the independence
-        requirement `purify()`'s success-probability formula relies on —
+        nodes) with anything already in ``self.nodes``; the independence
+        requirement `purify()`'s success-probability formula relies on
         since every remapped ID comes from ``self.next_id()`` and has
         never been issued before. Returns the clone's new root node_id;
         the candidate's ``state`` is unchanged (state values don't
@@ -429,7 +429,7 @@ class _SpanPartitionSearch:
 
         *base_pool* is this span's own pre-pump frontier (leaf or
         split/join candidates), so pumping is applied at most once per
-        span — see module docstring. The pool is always capped to a
+        span; see module docstring. The pool is always capped to a
         beam-limited width before pairing (never exhaustive, even under
         exact `dp_search`) since pairing is O(pool^2) per span. Unordered
         pairs (i, j) with i <= j are considered, including i == j (two
@@ -655,13 +655,13 @@ def dp_search(
 
     Exactness: **exact only for pumping-free schedules; a bounded
     heuristic once pumping is involved, unless `exact_pumping=True`.**
-    See module docstring's "Exactness modes" section — the split/join
+    See module docstring's "Exactness modes" section; the split/join
     dimension explored here has always been exact, but pumping's
     pairing step is O(pool^2) and compounds multiplicatively across the
     span recursion, so by default (`exact_pumping=False`) it is capped
     to `_DEFAULT_PUMP_POOL_WIDTH`, same as `beam_search` caps its whole
     frontier. Do not treat `dp_search`'s default output as a provable
-    upper bound on `beam_search` once both use pumping — use
+    upper bound on `beam_search` once both use pumping; use
     `exact_pumping=True` for that, and only at small N (see below).
 
     Parameters
@@ -683,13 +683,13 @@ def dp_search(
         (useful for isolating the DP contribution, e.g. in tests).
     exact_pumping : bool
         When True, pumping's pairing pool and its contribution to each
-        span's frontier are left completely uncapped — genuinely
+        span's frontier are left completely uncapped (genuinely
         exhaustive, matching this function's pre-pumping exactness
         guarantee in full. Only tractable at very small N (confirmed:
         N=2-3 fast; N=4 can take minutes; do not use at larger N).
         Intended as a narrow ground-truth check for validating that the
         default capped `dp_search`/`beam_search` are still tracking the
-        true optimum closely at sizes where this remains affordable —
+        true optimum closely at sizes where this remains affordable,
         not as a general-purpose search mode.
 
     Returns

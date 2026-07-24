@@ -25,7 +25,7 @@ purification strategies:
      bounded.
 
   2. **End-node optimistic**: same as above but with no intermediate
-     HeraldNodes — all classical communication deferred to the single
+     HeraldNodes; all classical communication deferred to the single
      final one-way herald.  Same parameter grid, heralded=False.
 
   3. **Link-level**: for each hop, generate n_copies single-hop raw edges,
@@ -216,7 +216,7 @@ def brute_force_search(
         )
 
     # ------------------------------------------------------------------
-    # 1.  Raw chain (n_pur = 1 — always included as trivial baseline)
+    # 1.  Raw chain (n_pur = 1, always included as trivial baseline)
     # ------------------------------------------------------------------
     record(ScheduleDAG.raw_chain(N), "raw")
 

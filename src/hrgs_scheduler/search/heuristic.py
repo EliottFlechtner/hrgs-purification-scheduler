@@ -10,9 +10,9 @@ fast to run at the paper's actual N=10 configuration (empirically:
 frontier size at width-7 spans already reaches ~1,200 candidates and
 keeps growing, making the width-10 top span intractable in practice).
 This module reuses the *exact same* recursive span-partition machinery
-(`hrgs_scheduler.search.dp._SpanPartitionSearch`) — same node-building
+(`hrgs_scheduler.search.dp._SpanPartitionSearch`): same node-building
 calls into `operations/backbone.py` / `operations/purification.py`, same
-physics — but caps each span's frontier at a fixed `beam_width` using
+physics; but caps each span's frontier at a fixed `beam_width` using
 `_beam_select` instead of keeping every non-dominated candidate. That
 turns the search from exponential-ish in N into polynomial in N for a
 fixed beam width, at the cost of no longer being provably exhaustive.
@@ -21,7 +21,7 @@ This is deliberately NOT a from-scratch greedy/annealing implementation:
 reusing `_SpanPartitionSearch` means beam search and `dp_search` share
 100% of their node-construction and evaluation code, so any result the
 beam search returns is a schedule `dp_search` would also have considered
-had its frontier not been pruned early — there is no separate
+had its frontier not been pruned early; there is no separate
 "heuristic model" that could silently diverge from the real physics.
 
 **Important:** `dp_search`'s own "pumping" move (two independently-
@@ -72,7 +72,7 @@ def beam_search(
 
     Identical in structure to `dp_search`, except each span's frontier is
     capped at `beam_width` candidates (ranked by `objective.f_min` as a
-    hint — see `search.dp._beam_key`) instead of kept in full. Use this
+    hint; see `search.dp._beam_key`) instead of kept in full. Use this
     when `N`/`e_max` make `dp_search`'s exact Pareto frontier intractable
     (in particular, the paper's N=10 reference configuration).
 
@@ -81,8 +81,8 @@ def beam_search(
     network : NetworkConfig
         Physical network configuration to evaluate against.
     objective : ObjectiveConfig
-        Objective function (defines score, feasibility, and — via
-        `f_min` — the beam-ranking hint).
+        Objective function (defines score, feasibility, and via
+        `f_min` the beam-ranking hint).
     e_max : int
         Maximum number of Gen nodes.
     beam_width : int

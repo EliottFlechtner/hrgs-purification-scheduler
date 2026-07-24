@@ -261,7 +261,7 @@ def save_result(
     with :func:`load_result` without re-running the search.
 
     Per-node ``State`` caches (``eval_result.node_states``) are NOT
-    persisted — they are large and fully recomputable::
+    persisted; they are large and fully recomputable::
 
         dag, network, _ = load_schedule(path)
         full_eval = Evaluator(network).evaluate(dag)
