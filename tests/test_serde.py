@@ -60,7 +60,7 @@ def small_net(N: int = 3) -> NetworkConfig:
 
 
 def het_net() -> NetworkConfig:
-    """Heterogeneous network — tests non-uniform hop serialization."""
+    """Heterogeneous network: tests non-uniform hop serialization."""
     return NetworkConfig(
         hops=(
             HopConfig(
@@ -328,9 +328,9 @@ class TestNetworkRoundTrip:
         d = network_to_dict(net)
         back = dict_to_network(d)
         assert back.N == 2
-        # eta for hop 0 was given explicitly — must round-trip exactly
+        # eta for hop 0 was given explicitly; must round-trip exactly
         assert back.hop(0).eta == pytest.approx(net.hop(0).eta)
-        # eta for hop 1 was computed from length/attenuation — must also match
+        # eta for hop 1 was computed from length/attenuation; must also match
         assert back.hop(1).eta == pytest.approx(net.hop(1).eta)
         assert back.hop(1).attenuation_db_per_km == net.hop(1).attenuation_db_per_km
 
@@ -496,7 +496,7 @@ class TestSearchResultRoundTrip:
         assert ev.success_prob == pytest.approx(meta["eval"]["success_prob"], rel=1e-12)
 
     def test_loaded_node_states_empty(self):
-        """node_states is not stored — returned as empty dict."""
+        """node_states is not stored; returned as empty dict."""
         results, net = self._run_search()
         with tempfile.TemporaryDirectory() as tmp:
             p = save_result(results[0], Path(tmp) / "r.json", network=net)
