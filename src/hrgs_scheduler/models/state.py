@@ -13,13 +13,13 @@ Formal definition [Validated Formal Model Def, §3.1]:
 
 Fields
 ------
-error_vector       : e   — Bell-diagonal error-probability vector.
-side_effect_parity : s   — accumulated Clifford side-effect parity (𝔽₂).
-current_time       : t   — instantaneous simulation timestamp.
-generation_time    : t_gen — timestamp at which this resource was created.
-stage              : κ   — processing stage / span index.
-purification_rounds: r   — number of purification rounds already applied.
-herald_status      : h   — whether classical heralding has been resolved.
+error_vector       : e, Bell-diagonal error-probability vector.
+    side_effect_parity : s, accumulated Clifford side-effect parity (𝔽₂).
+    current_time       : t, instantaneous simulation timestamp.
+    generation_time    : t_gen, timestamp at which this resource was created.
+    stage              : κ, processing stage / span index.
+    purification_rounds: r, number of purification rounds already applied.
+    herald_status      : h, whether classical heralding has been resolved.
 """
 
 from __future__ import annotations
@@ -34,8 +34,8 @@ from hrgs_scheduler.models.stage import Stage, RGSS
 class HeraldStatus(Enum):
     """Heralding-resolution status of an entanglement resource.
 
-    PENDING  — classical heralding outcome not yet received (optimistic mode).
-    RESOLVED — classical heralding outcome confirmed; PauliCorrect is legal.
+    PENDING:  classical heralding outcome not yet received (optimistic mode).
+    RESOLVED: classical heralding outcome confirmed; PauliCorrect is legal.
     """
 
     PENDING = auto()

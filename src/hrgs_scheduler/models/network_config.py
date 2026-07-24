@@ -13,9 +13,13 @@ global physical constants.
 
 Inner-qubit error model [Bridging, eq. (10)]
 --------------------------------------------
-For a single hop with branching vector 𝓫 = (b₀, …, b_m):
-    m  = len(𝓫)  — tree depth / arm multiplicity
+For a single hop with arm count kᵢ and branching vector 𝓫 = (b₀, …, b_{d-1}):
+    m  = kᵢ = arm_count  (biclique arm multiplicity; NOT the tree depth len(𝓫))
     p_ZI = p_IZ = ½ [1 − (1 − 2 p^X_in)(1 − 2 p^Z_in)^(m−1)]
+
+The (m−1) exponent counts the other (m−1) arms whose Z-basis inner-qubit
+measurements contribute parity errors to the anchor.  For the paper config:
+m = k_i = 18 arms, len(𝓫) = 3 (tree depth) — these are distinct quantities.
 
 End-to-end accumulated inner-qubit errors [Bridging, eqs. (6)−(9)]:
     p_ZI^e2e = ½ [1 − (1 − 2 p_ZI)^N]

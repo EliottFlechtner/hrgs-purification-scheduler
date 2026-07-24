@@ -8,8 +8,8 @@ network the resource currently lives [Validated Formal Model Def, §3.1]:
 
     κ ∈ { RGSS } ∪ { Span(a, b) : 0 ≤ a < b ≤ N }
 
-RGSS  — pre-transmission, RGSS-local (single-station) resource.
-Span  — an established edge covering hops a through b (inclusive).
+RGSS: pre-transmission, RGSS-local (single-station) resource.
+Span: an established edge covering hops a through b (inclusive).
         Span(i-1, i) is a single-hop link at hop i.
         Span(0, N)   is the full end-to-end pair.
 
@@ -88,7 +88,7 @@ class Span:
         return f"Span({self.a}, {self.b})"
 
 
-# Canonical singleton for the RGSS stage — used as a sentinel value
+# Canonical singleton for the RGSS stage, used as a sentinel value
 # throughout the codebase.
 RGSS: RGSSStage = RGSSStage()
 
