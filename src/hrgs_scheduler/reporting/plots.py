@@ -88,7 +88,7 @@ def style_for(variant: str, **overrides: object) -> dict[str, object]:
     """Return the canonical style dict for *variant*, with any *overrides*
     (e.g. a more specific `label`) applied on top. Unknown variants get an
     empty base style so matplotlib falls back to its default cycle rather
-    than erroring — callers should still add unrecognised roles to
+    than erroring; callers should still add unrecognised roles to
     `VARIANT_STYLE` above so future figures stay consistent.
     """
     style = dict(VARIANT_STYLE.get(variant, {}))
