@@ -41,27 +41,27 @@ Canonical timing table [Integrating, §IV-B]
 
 Key insight [Integrating, §III-B, §VI]: baseline uses *heralded* two-way
 purification via entanglement pumping [Gidney 2023], which is inherently
-sequential — each of the n_rounds = n_pur − 1 pumping rounds must wait for
+sequential: each of the n_rounds = n_pur − 1 pumping rounds must wait for
 a full round-trip (2L/c) classical confirmation of the previous round's
 success before proceeding ("the avoidance of classical communication
 multiple rounds of end node communications ... required in the baseline
 scheme for coordinating entanglement pumping across long distances"
 [Integrating, §VI]). The optimistic/flexible scheme instead defers *all*
-heralding — regardless of how many nested purification stages (link-level,
-segment-level, end-node combination) are used — to a single round of
+heralding regardless of how many nested purification stages (link-level,
+    segment-level, end-node combination) are used, to a single round of
 classical communication at the very end, paying only L/c once. This is
 the dominant source of the reported 45–65× rate advantage, not merely the
 factor-of-2 floor from a single deferred herald.
 
 Physical time-scale parameters
 -------------------------------
-  τ_half   — half-RGS generation latency.
+  τ_half: half-RGS generation latency.
              For tree branching b⃗ = (b₀, …, b_{m-1}):
                τ_half = τ_emit × Σ_j log₂(b_j)
              where τ_emit is the per-qubit emission / gate cycle time.
-  τ_join   — anchor CZ + XX measurement latency (≈ τ_emit in practice).
-  τ_pur    — purification circuit latency (≈ τ_emit; small).
-  L/c      — one-way propagation time: L_total / c.
+  τ_join: anchor CZ + XX measurement latency (≈ τ_emit in practice).
+  τ_pur: purification circuit latency (≈ τ_emit; small).
+  L/c: one-way propagation time (L_total / c).
 
 Rate definition (renewal-theory)
 ---------------------------------
@@ -262,7 +262,7 @@ def rate_ratio_opt_vs_raw(
     p_success_opt: float,
     n_rounds: int | None = None,
 ) -> float:
-    """Compute R_opt / R_raw — the rate ratio targeted by [Integrating, Fig. 6].
+    """Compute R_opt / R_raw, the rate ratio targeted by [Integrating, Fig. 6].
 
     R_opt / R_raw = (P_opt / τ_cycle^(opt)) / (1 / τ_cycle^(raw))
                  = P_opt × τ_cycle^(raw) / τ_cycle^(opt)
@@ -296,11 +296,11 @@ def rate_ratio_opt_vs_base(
     p_success_base: float,
     n_rounds: int | None = None,
 ) -> float:
-    """Compute R_opt / R_base — the "optimistic vs. heralded baseline" ratio.
+    """Compute R_opt / R_base, the "optimistic vs. heralded baseline" ratio.
 
     In the L/c-dominated regime, this ratio approaches ``n_rounds`` (the
     number of sequential heralded round trips avoided by the optimistic
-    scheme), rather than a fixed floor of 2 — see module docstring.
+    scheme), rather than a fixed floor of 2; see the module docstring.
 
     Parameters
     ----------
