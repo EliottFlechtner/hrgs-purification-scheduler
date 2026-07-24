@@ -1,7 +1,7 @@
 """
 hrgs_scheduler.schedule.dag
 =============================
-Schedule DAG — the formal schedule object Σ = (T, φ).
+Schedule DAG: the formal schedule object Σ = (T, φ).
 
 A ScheduleDAG wraps a dictionary of ScheduleNode objects connected by
 node_id references.  The root is always a PauliCorrectNode.
@@ -21,18 +21,18 @@ by ID and a clean separation between structure (DAG) and evaluation
     both children, Join/EntSwap requires two RGSS-local resources or two
     adjacent Spans (span-consistency: Span(a,b)+Span(b,d) -> Span(a,d)),
     PauliCorrect requires κ = Span(0, N).
-  - Resource-budget feasibility (E_max/M_max, §5) is NOT checked here —
+  - Resource-budget feasibility (E_max/M_max, §5) is NOT checked here;
     see ``cost_functions.satisfies_budget`` for the E_max (Gen-count) part;
     M_max (max concurrent open branches) has no enforcement yet.
 
 Convenience builders
 --------------------
-``ScheduleDAG.raw_chain``               — no purification, N-hop chain.
-``ScheduleDAG.baseline_end_node_pumping``— end-node entanglement pumping
+``ScheduleDAG.raw_chain``               : no purification, N-hop chain.
+``ScheduleDAG.baseline_end_node_pumping``: end-node entanglement pumping
                                            [Integrating, §V-C/§VI].
-``ScheduleDAG.flexible_paper_schedule`` — the flexible schedule from
+``ScheduleDAG.flexible_paper_schedule`` : the flexible schedule from
                                            [Integrating, Fig. 4].
-``ScheduleDAG.single_hop_yy_purified``  — single-hop YY pumping demo.
+``ScheduleDAG.single_hop_yy_purified``  : single-hop YY pumping demo.
 """
 
 from __future__ import annotations
@@ -277,7 +277,7 @@ class ScheduleDAG:
 
     @property
     def gen_node_count(self) -> int:
-        """Number of Gen leaves — the resource cost C(Σ)."""
+        """Number of Gen leaves (the resource cost C(Σ))."""
         return sum(1 for n in self.nodes.values() if isinstance(n, GenNode))
 
     @property
@@ -531,21 +531,21 @@ class ScheduleDAG:
 
         Generalises ``baseline_end_node_pumping`` along two new axes:
 
-        **Circuit sequence** — caller supplies the exact circuit for each
+        **Circuit sequence**: caller supplies the exact circuit for each
         pumping round via *circuits* (length ``n_pur - 1``).  If omitted,
         defaults to the paper's cycling sequence ``[YY, ZX, YY, XZ, …]``,
         making this a drop-in replacement for the baseline builder.
 
-        **Herald placement** — determined by the *heralded* flag:
+        **Herald placement**: determined by the *heralded* flag:
 
         * ``heralded=True`` (default): inserts a round-trip HeraldNode
           (``propagation_time=2.0``, i.e. 2×L_total/c) after every
-          PurifyNode in the pumping chain — exactly the sequential
+          PurifyNode in the pumping chain, exactly the sequential
           heralded confirmation modeled by ``baseline_end_node_pumping``
           [Integrating, §III-B, §VI].
 
         * ``heralded=False``: chains PurifyNodes directly with no
-          intermediate Heralds — the *optimistic* variant where all
+          intermediate Heralds, the *optimistic* variant where all
           classical communication is deferred to the single final
           one-way Herald shared by all schemes.  In this mode the
           latency is the same as ``flexible_paper_schedule`` (1×L/c),
@@ -647,8 +647,8 @@ class ScheduleDAG:
         This corresponds to the kind of purification applied to Pair A in
         ``flexible_paper_schedule``, generalised to arbitrary copy count
         and circuit choice.  Unlike the end-node strategies, purification
-        here happens *before* stitching — at the smallest possible span
-        (Span(i, i+1)) — which limits decoherence exposure and avoids the
+        here happens *before* stitching, at the smallest possible span
+        (Span(i, i+1)), which limits decoherence exposure and avoids the
         round-trip herald cost of heralded end-node pumping.
 
         With n_copies=1 this degenerates to a plain ``raw_chain``.

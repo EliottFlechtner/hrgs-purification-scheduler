@@ -15,13 +15,13 @@ Every node carries:
 
 Node types mirror the operation catalog [Validated Formal Model Def, §2.5 + §3.2]:
 
-    GenNode            — leaf; produces an RGSS-local resource
-    JoinNode           — Join/EntSwap; 2 inputs
-    AbsaBsmNode        — outer-photon BSM at ABSA; 2 RGSS inputs → single-hop edge
-    IdleNode           — decoherence wait; 1 input
-    HeraldNode         — heralding resolution; 1 input
-    PurifyNode         — 2-to-1 purification; 2 inputs, same κ
-    PauliCorrectNode   — terminal; 1 input at κ = Span(0, N)
+    GenNode:            leaf; produces an RGSS-local resource
+    JoinNode:           Join/EntSwap; 2 inputs
+    AbsaBsmNode:        outer-photon BSM at ABSA; 2 RGSS inputs → single-hop edge
+    IdleNode:           decoherence wait; 1 input
+    HeraldNode:         heralding resolution; 1 input
+    PurifyNode:         2-to-1 purification; 2 inputs, same κ
+    PauliCorrectNode:   terminal; 1 input at κ = Span(0, N)
 
 Each node is an immutable frozen dataclass; mutation happens by rebuilding.
 """
@@ -47,7 +47,7 @@ NodeId = int
 
 @dataclass(frozen=True)
 class GenNode:
-    """Leaf node — produces a fresh RGSS-local resource.
+    """Leaf node: produces a fresh RGSS-local resource.
 
     Parameters
     ----------
@@ -79,7 +79,7 @@ class GenNode:
 
 @dataclass(frozen=True)
 class AbsaBsmNode:
-    """Outer-photon BSM at the ABSA — creates a single-hop edge.
+    """Outer-photon BSM at the ABSA: creates a single-hop edge.
 
     Consumes two RGSS-local resources (one from each side of a hop) and
     produces a State at κ = Span(hop_index, hop_index + 1).
@@ -88,7 +88,7 @@ class AbsaBsmNode:
     ----------
     node_id : NodeId
     children : tuple[NodeId, NodeId]
-        (left_gen_id, right_gen_id) — both must produce RGSS-local States.
+        (left_gen_id, right_gen_id): both must produce RGSS-local States.
     hop_index : int
         0-indexed hop number.  Determines κ_out = Span(hop_index, hop_index+1).
     """
@@ -104,7 +104,7 @@ class AbsaBsmNode:
 
 @dataclass(frozen=True)
 class JoinNode:
-    """Join / EntSwap — entanglement swap between two adjacent resources.
+    """Join / EntSwap: entanglement swap between two adjacent resources.
 
     Inputs may be:
       - Two RGSS-local States → output at RGSS  (pre-transmission pairing)
@@ -127,13 +127,13 @@ class JoinNode:
 
 @dataclass(frozen=True)
 class PurifyNode:
-    """2-to-1 purification — consumes two States at the same κ.
+    """2-to-1 purification: consumes two States at the same κ.
 
     Parameters
     ----------
     node_id : NodeId
     children : tuple[NodeId, NodeId]
-        (primary_id, ancilla_id) — both must be at the same κ.
+        (primary_id, ancilla_id): both must be at the same κ.
     circuit : PurificationCircuit
         Which stabilizer circuit to apply: YY, ZX, or XZ.
     output_stage : Stage
@@ -148,7 +148,7 @@ class PurifyNode:
 
 @dataclass(frozen=True)
 class IdleNode:
-    """Idle / decoherence wait — advances the clock without an operation.
+    """Idle / decoherence wait: advances the clock without an operation.
 
     Parameters
     ----------
@@ -194,7 +194,7 @@ class HeraldNode:
 
 @dataclass(frozen=True)
 class PauliCorrectNode:
-    """Terminal Pauli-frame correction — root of the schedule DAG.
+    """Terminal Pauli-frame correction: root of the schedule DAG.
 
     Parameters
     ----------

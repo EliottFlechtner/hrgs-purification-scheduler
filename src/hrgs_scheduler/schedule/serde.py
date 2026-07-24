@@ -2,7 +2,7 @@
 hrgs_scheduler.schedule.serde
 ================================
 Lossless JSON serialization / deserialization for ScheduleDAG and
-NetworkConfig objects — the two components needed to fully reproduce
+NetworkConfig objects: the two components needed to fully reproduce
 any schedule found by the outer-loop search.
 
 Format
@@ -28,7 +28,7 @@ structure::
 
 Version history
 ---------------
-  1 — initial format (current).
+  1: initial format (current).
 
 Stability guarantees
 --------------------
@@ -382,9 +382,9 @@ def load_schedule(
     meta : dict
         Metadata dict with keys:
 
-        ``label``   — the saved label string (empty string if not set).
-        ``score``   — the saved objective score (``None`` if not set).
-        ``eval``    — a dict with keys ``fidelity``, ``rate``,
+        ``label``: the saved label string (empty string if not set).
+        ``score``: the saved objective score (``None`` if not set).
+        ``eval``: a dict with keys ``fidelity``, ``rate``,
                      ``resource_cost``, ``latency_s``, ``success_prob``
                      (each may be ``None`` if not stored).
 

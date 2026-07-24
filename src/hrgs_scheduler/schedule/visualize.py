@@ -48,7 +48,7 @@ Highlighting a pumping move
 ----------------------------
 ``to_dot``'s ``highlight_groups`` parameter wraps chosen node subsets in
 labeled, colored cluster subgraphs on top of the normal type-based
-color/shape coding — used to make a pumping move's two independent
+color/shape coding, used to make a pumping move's two independent
 copies visually obvious as distinct subtrees converging into one
 ``Purify-*`` node (see ``experiments/visualize_pumping_schedule.py``).
 
@@ -57,7 +57,7 @@ Purification chain depth
 ``purification_chain_depth``/``deepest_purification_chain`` compute the
 longest run of directly-chained ``Purify-*`` nodes in a DAG (how many
 purification rounds stack before hitting a Gen/Join boundary), read
-directly from the DAG's node/edge structure — NOT from any node's
+directly from the DAG's node/edge structure, NOT from any node's
 human-readable label text.
 """
 
@@ -87,7 +87,7 @@ if TYPE_CHECKING:
 
 # ---------------------------------------------------------------------------
 # Style table: one entry per node type.
-# (fillcolor, shape, style) — fed directly into DOT node attributes.
+# (fillcolor, shape, style), fed directly into DOT node attributes.
 # ---------------------------------------------------------------------------
 
 _NODE_STYLE: dict[type, tuple[str, str, str]] = {
@@ -170,12 +170,12 @@ def to_dot(
     graph_name : str
         DOT graph name (must be a valid DOT identifier).
     rankdir : str
-        Graphviz ``rankdir`` — ``"BT"`` (bottom-to-top, leaves at the
-        bottom / root at top, matching data flow) by default. Use
+        Graphviz ``rankdir`` (``"BT"`` by default, bottom-to-top, leaves at the
+        bottom / root at top, matching data flow). Use
         ``"TB"``, ``"LR"``, or ``"RL"`` for alternate layouts.
     highlight_groups : dict[str, (set[NodeId], str)], optional
         Extra visual grouping layered on top of the normal per-node-type
-        color/shape coding — e.g. to make a pumping move's two
+        color/shape coding; for example, to make a pumping move's two
         independent copies visually obvious as distinct subtrees
         converging into one ``Purify-*`` node. Maps a group label
         (used as the cluster's DOT ``label``) to ``(node_ids, color)``.
@@ -350,8 +350,8 @@ def render(
 # "Chain depth" = the longest run of directly-chained PurifyNodes, i.e. how
 # many purification rounds stack on top of each other (each consuming the
 # previous round's output plus one fresh independent copy) before hitting a
-# Gen/Join boundary. Computed purely from (T, φ) structure — a node's
-# `children` — never from label text, per
+# Gen/Join boundary. Computed purely from (T, φ) structure, via a node's
+# `children`, never from label text, per
 # docs/Handoff_Timing_and_Pumping_Visualization.md §2.1.
 
 
@@ -455,8 +455,8 @@ def pumping_highlight_groups(
     continuing the chain) is grouped as an independent copy pumped in at
     that round, in *fresh_color*. The chain's own PurifyNodes are grouped
     together in *chain_color*, so the DAG rendering makes each pumping
-    move's two converging copies — "accumulated chain so far" vs. "this
-    round's fresh copy" — visually obvious.
+    move's two converging copies: "accumulated chain so far" vs. "this
+    round's fresh copy", visually obvious.
     """
     groups: dict[str, tuple[set[NodeId], str]] = {}
     if chain:
@@ -467,7 +467,7 @@ def pumping_highlight_groups(
         node = dag.nodes[purify_id]
         assert isinstance(node, PurifyNode)
         # "Accumulated" child is either a PurifyNode in chain_set (optimistic
-        # chaining) OR a HeraldNode (heralded pumping — each round separated by
+        # chaining) OR a HeraldNode (heralded pumping: each round separated by
         # a round-trip Herald, so the chain depth is 1 but the accumulated side
         # is the Herald that wraps the previous round's output).  The "fresh"
         # child is the one that is neither in the chain nor a HeraldNode.

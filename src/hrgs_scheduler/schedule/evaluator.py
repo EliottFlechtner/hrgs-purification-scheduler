@@ -15,9 +15,9 @@ from the root State.
 
 Cost function extraction
 ------------------------
-    F(Σ; N) = w_root         — fidelity (w component of root error vector)
-    C(Σ)    = |Gen leaves|    — resource cost (count of GenNodes)
-    L(Σ; N) = root.current_time — latency / makespan
+    F(Σ; N) = w_root         (fidelity, w component of root error vector)
+    C(Σ)    = |Gen leaves|    (resource cost, count of GenNodes)
+    L(Σ; N) = root.current_time (latency / makespan)
     R(Σ; N) = P_success / E[wall-clock time]
                under a renewal-theory restart model; P_success is the
                product of all PurifyNode success probabilities along
@@ -32,12 +32,12 @@ EvaluationResult
 ----------------
 Named tuple returned by ``Evaluator.evaluate``:
 
-    fidelity        : float   — F(Σ)
-    rate            : float   — R(Σ)  (unnormalised; requires time unit)
-    resource_cost   : int     — C(Σ)  (Gen node count)
-    latency         : float   — L(Σ)  (makespan of T)
-    success_prob    : float   — P[Σ succeeds] (product of Purify probs)
-    node_states     : dict    — NodeId → State (full per-node cache)
+    fidelity        : float    F(Σ)
+    rate            : float    R(Σ)  (unnormalised; requires time unit)
+    resource_cost   : int      C(Σ)  (Gen node count)
+    latency         : float    L(Σ)  (makespan of T)
+    success_prob    : float    P[Σ succeeds] (product of Purify probs)
+    node_states     : dict     NodeId → State (full per-node cache)
 """
 
 from __future__ import annotations
